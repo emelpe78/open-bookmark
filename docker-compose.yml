@@ -1,0 +1,15 @@
+services:
+  open-bookmark:
+    build: ./open-bookmark
+    ports:
+      - "3777:3777"
+    environment:
+      DATABASE_PATH: /data/bookmarks.db
+      APP_PORT: "3777"
+      PORT: "3777"
+      HOST: "0.0.0.0"
+    volumes:
+      - openbookmark_data:/data
+
+volumes:
+  openbookmark_data:

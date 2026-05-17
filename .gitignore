@@ -11,12 +11,31 @@ dist/
 !.env.example
 !**/.env.example
 
-# boilerplate — Build-Caches, Artefakte, lokale Daten (Nuxt/Vite/Nitro)
-boilerplate/.data/
-boilerplate/coverage/
-boilerplate/.eslintcache
-boilerplate/**/*.tsbuildinfo
-boilerplate/.vercel/
+# Lokale Daten
+*.db
+data/
 
-# files
+# open-bookmark — Build-Caches, Artefakte
+open-bookmark/.data/
+open-bookmark/coverage/
+open-bookmark/.eslintcache
+open-bookmark/**/*.tsbuildinfo
+
+# Settings
+.vscode/
+tsconfig.json
+
+# Files
+docs/
 .DS_Store
+
+# AI
+.agents/
+.out-of-scope/
+.scratch
+scripts/
+AGENTS.md
+CONTEXT.md
+
+# Logs
+skills-lock.json

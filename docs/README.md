@@ -1,9 +1,10 @@
 # Docs
 
-## Tools
+Produkt- und Fachdokumentation für Open-Bookmark.
 
-- [Matt Pocock's Skills](https://github.com/mattpocock/skills)
-- [Get Design](https://getdesign.md/)
-- [Frontend Design Skill](https://skills.sh/anthropics/skills/frontend-design)
-- [UI/UX Pro Max Skill](https://skills.sh/nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max)
-- [LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
+Die **Haupt-README** mit Setup, Docker und API steht im [Repository-Root](../README.md).
+
+## Inhalt
+
+- [`PRD_OpenBookmark.md`](PRD_OpenBookmark.md) — Product Requirements Document
+- [`markdown_eingabemoeglichkeiten_spickzettel.md`](markdown_eingabemoeglichkeiten_spickzettel.md) — Markdown-Spickzettel für Notizen

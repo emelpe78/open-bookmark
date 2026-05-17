@@ -1,14 +1,32 @@
 import { defineNuxtConfig } from "nuxt/config";
 
-// https://nuxt.com/docs/api/configuration/nuxt-config
-// Verzeichnisstruktur (Nuxt 4): https://nuxt.com/docs/4.x/guide/directory-structure
 export default defineNuxtConfig({
-  // Projektroot bleibt srcDir; App-Quellen (pages, components, …) liegen unter dir.app.
-  srcDir: ".",
+  modules: ["@nuxt/ui", "@nuxt/icon"],
 
-  dir: {
-    app: "app",
+  pages: true,
+
+  css: ["~/assets/css/main.css"],
+
+  runtimeConfig: {
+    databasePath: process.env.DATABASE_PATH || "./data/bookmarks.db",
+    public: {
+      appPort: process.env.APP_PORT || "3777",
+    },
   },
+
+  devServer: {
+    port: Number(process.env.APP_PORT || process.env.PORT) || 3777,
+  },
+
+  $production: {
+    nitro: {
+      env: {
+        PORT: process.env.APP_PORT || process.env.PORT || "3777",
+      },
+    },
+  },
+
+  serverExternalPackages: ["better-sqlite3"],
 
   app: {
     head: {
