@@ -14,6 +14,7 @@ dist/
 # Lokale Daten
 *.db
 data/
+open-bookmark/data/
 
 # open-bookmark — Build-Caches, Artefakte
 open-bookmark/.data/
@@ -21,21 +22,21 @@ open-bookmark/coverage/
 open-bookmark/.eslintcache
 open-bookmark/**/*.tsbuildinfo
 
-# Settings
+# IDE (lokal, Monorepo-Workspace)
 .vscode/
-tsconfig.json
 
-# Files
+# Lokale Docs (optional im Repo; PRD etc. liegen unter docs/)
 docs/
+
+# OS
 .DS_Store
 
-# AI
-.agents/
-.out-of-scope/
-.scratch
-scripts/
+# Lokale Tooling & AI (nicht im öffentlichen Repo)
+/tsconfig.json
+skills-lock.json
 AGENTS.md
 CONTEXT.md
-
-# Logs
-skills-lock.json
+.agents/
+.out-of-scope/
+.scratch/
+scripts/
