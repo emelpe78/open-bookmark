@@ -1,0 +1,22 @@
+# Nuxt / Node (repositoryweit)
+node_modules/
+.nuxt/
+.output/
+dist/
+*.log
+
+# Secrets & lokale Umgebungen
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# boilerplate — Build-Caches, Artefakte, lokale Daten (Nuxt/Vite/Nitro)
+boilerplate/.data/
+boilerplate/coverage/
+boilerplate/.eslintcache
+boilerplate/**/*.tsbuildinfo
+boilerplate/.vercel/
+
+# files
+.DS_Store
