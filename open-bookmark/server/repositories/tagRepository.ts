@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
-import { BookmarkDomainError } from "../../shared/errors/bookmarkErrors";
-import { parseTagInput } from "../../shared/lib/parseTagInput";
+import { BookmarkDomainError } from "#shared/errors/bookmarkErrors";
+import { parseTagInput } from "#shared/lib/parseTagInput";
 
 export interface TagRow {
   id: number;

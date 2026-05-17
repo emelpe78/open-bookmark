@@ -18,7 +18,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-ENV PORT=3777
+ENV PORT=3778
 ENV DATABASE_PATH=/data/bookmarks.db
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -32,6 +32,6 @@ COPY --from=build /app/.output ./.output
 
 RUN mkdir -p /data
 
-EXPOSE 3777
+EXPOSE 3778
 
 CMD ["node", ".output/server/index.mjs"]

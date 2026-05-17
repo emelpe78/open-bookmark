@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Bookmark } from "../../shared/types/bookmark";
+import type { Bookmark } from "#shared/types/bookmark";
 import { extractFetchError } from "../utils/extractFetchError";
 
 useHead({

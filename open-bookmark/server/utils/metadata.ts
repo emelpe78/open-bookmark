@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import type { PageMetadata } from "../../shared/types/bookmark";
+import type { PageMetadata } from "#shared/types/bookmark";
 
 const FETCH_TIMEOUT_MS = 10_000;
 const USER_AGENT =

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BulkImportResult } from "../../shared/types/bookmark";
+import type { BulkImportResult } from "#shared/types/bookmark";
 import { extractFetchError } from "../utils/extractFetchError";
 
 const open = defineModel<boolean>("open", { default: false });

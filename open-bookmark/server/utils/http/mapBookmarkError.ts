@@ -1,4 +1,4 @@
-import { BookmarkDomainError } from "../../../shared/errors/bookmarkErrors";
+import { BookmarkDomainError } from "#shared/errors/bookmarkErrors";
 
 const STATUS_BY_CODE: Record<BookmarkDomainError["code"], number> = {
   NOT_FOUND: 404,

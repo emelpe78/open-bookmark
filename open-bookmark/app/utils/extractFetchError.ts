@@ -1,4 +1,4 @@
-import { BOOKMARK_ERROR_MESSAGES } from "../../shared/errors/bookmarkErrors";
+import { BOOKMARK_ERROR_MESSAGES } from "#shared/errors/bookmarkErrors";
 
 const FALLBACK_MESSAGE = "Speichern fehlgeschlagen.";
 

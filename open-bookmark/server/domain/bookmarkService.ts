@@ -1,6 +1,6 @@
-import type { Bookmark, PageMetadata } from "../../shared/types/bookmark";
-import { BookmarkDomainError } from "../../shared/errors/bookmarkErrors";
-import { parseTagInput } from "../../shared/lib/parseTagInput";
+import type { Bookmark, PageMetadata } from "#shared/types/bookmark";
+import { BookmarkDomainError } from "#shared/errors/bookmarkErrors";
+import { parseTagInput } from "#shared/lib/parseTagInput";
 import { normalizeNotesInput } from "../../lib/markdown";
 import { normalizeUrl, UrlValidationError } from "../utils/normalizeUrl";
 import { resolvePageMetadata } from "../utils/metadata";

@@ -4,11 +4,11 @@ import type {
   BulkImportResult,
   CreateBookmarkResponse,
   TagsResponse,
-} from "../../shared/types/bookmark";
+} from "#shared/types/bookmark";
 import {
   DEFAULT_PAGE_SIZE,
   PAGE_SIZE_OPTIONS,
-} from "../../shared/constants/pagination";
+} from "#shared/constants/pagination";
 
 export { PAGE_SIZE_OPTIONS };
 

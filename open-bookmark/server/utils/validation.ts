@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   DEFAULT_PAGE_SIZE,
   MAX_PAGE_SIZE,
-} from "../../shared/constants/pagination";
+} from "#shared/constants/pagination";
 
 export const listBookmarksQuerySchema = z.object({
   search: z.string().optional(),

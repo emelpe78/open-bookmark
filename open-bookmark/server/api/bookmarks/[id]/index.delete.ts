@@ -1,5 +1,5 @@
 import { createBookmarkService } from "../../../domain/createBookmarkService";
-import { BookmarkDomainError } from "../../../../shared/errors/bookmarkErrors";
+import { BookmarkDomainError } from "#shared/errors/bookmarkErrors";
 import { mapBookmarkErrorToH3 } from "../../../utils/http/mapBookmarkError";
 import { parseBookmarkId } from "../../../utils/http/parseRouteParams";
 

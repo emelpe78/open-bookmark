@@ -1,4 +1,4 @@
-import type { Bookmark } from "../../shared/types/bookmark";
+import type { Bookmark } from "#shared/types/bookmark";
 
 export function useBookmarkModals() {
   const editingBookmark = useState<Bookmark | null>("bookmark-editing", () => null);

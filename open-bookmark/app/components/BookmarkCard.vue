@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Bookmark } from "../../shared/types/bookmark";
+import type { Bookmark } from "#shared/types/bookmark";
 
 const props = defineProps<{
   bookmark: Bookmark;

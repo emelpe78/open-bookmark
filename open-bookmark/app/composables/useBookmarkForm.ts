@@ -1,4 +1,4 @@
-import { parseTagInput } from "../../shared/lib/parseTagInput";
+import { parseTagInput } from "#shared/lib/parseTagInput";
 
 export function useBookmarkForm() {
   function parseTagsFromInput(tagsInput: string): string[] {

@@ -37,11 +37,13 @@ Vom Repository-Root:
 docker compose up --build
 ```
 
+Die App läuft unter [http://localhost:3778](http://localhost:3778) (Dev weiterhin auf Port 3777).
+
 Oder manuell:
 
 ```bash
 docker build -t open-bookmark ./open-bookmark
-docker run -p 3777:3777 -v openbookmark_data:/data open-bookmark
+docker run -p 3778:3778 -v openbookmark_data:/data open-bookmark
 ```
 
 ## Umgebungsvariablen
@@ -50,7 +52,7 @@ docker run -p 3777:3777 -v openbookmark_data:/data open-bookmark
 |----------|----------|--------------|
 | `APP_PORT` | `3777` | Port für Dev-Server |
 | `DATABASE_PATH` | `./data/bookmarks.db` | Pfad zur SQLite-Datei (lokal); im Container `/data/bookmarks.db` |
-| `PORT` | `3777` | Port im Production-Container |
+| `PORT` | `3778` (Docker) / `3777` (Dev) | Port im Production-Container bzw. Dev-Server |
 
 Siehe [`open-bookmark/.env.example`](open-bookmark/.env.example).
 

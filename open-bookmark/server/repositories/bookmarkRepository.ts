@@ -1,9 +1,9 @@
 import type Database from "better-sqlite3";
-import type { Bookmark } from "../../shared/types/bookmark";
+import type { Bookmark } from "#shared/types/bookmark";
 import {
   DEFAULT_PAGE_SIZE,
   MAX_PAGE_SIZE,
-} from "../../shared/constants/pagination";
+} from "#shared/constants/pagination";
 
 export interface BookmarkRow {
   id: number;
