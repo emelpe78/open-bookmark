@@ -27,7 +27,40 @@ function firstNonEmpty(...values: Array<string | null | undefined>): string | nu
   return null;
 }
 
-export async function fetchPageMetadata(url: string): Promise<PageMetadata> {
+export function extractMetadataFromHtml(html: string, pageUrl: string): PageMetadata {
+  const $ = cheerio.load(html);
+
+  const title = firstNonEmpty(
+    $('meta[property="og:title"]').attr("content"),
+    $('meta[name="twitter:title"]').attr("content"),
+    $("title").text(),
+  );
+
+  const description = firstNonEmpty(
+    $('meta[property="og:description"]').attr("content"),
+    $('meta[name="description"]').attr("content"),
+    $('meta[name="twitter:description"]').attr("content"),
+  );
+
+  const imageRaw = firstNonEmpty(
+    $('meta[property="og:image"]').attr("content"),
+    $('meta[name="twitter:image"]').attr("content"),
+  );
+
+  const site_name = firstNonEmpty(
+    $('meta[property="og:site_name"]').attr("content"),
+    new URL(pageUrl).hostname,
+  );
+
+  return {
+    title,
+    description,
+    image_url: resolveAbsoluteUrl(pageUrl, imageRaw ?? undefined),
+    site_name,
+  };
+}
+
+export async function fetchPageHtml(url: string): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
@@ -50,40 +83,15 @@ export async function fetchPageMetadata(url: string): Promise<PageMetadata> {
       throw new Error("Kein HTML-Inhalt");
     }
 
-    const html = await response.text();
-    const $ = cheerio.load(html);
-
-    const title = firstNonEmpty(
-      $('meta[property="og:title"]').attr("content"),
-      $('meta[name="twitter:title"]').attr("content"),
-      $("title").text(),
-    );
-
-    const description = firstNonEmpty(
-      $('meta[property="og:description"]').attr("content"),
-      $('meta[name="description"]').attr("content"),
-      $('meta[name="twitter:description"]').attr("content"),
-    );
-
-    const imageRaw = firstNonEmpty(
-      $('meta[property="og:image"]').attr("content"),
-      $('meta[name="twitter:image"]').attr("content"),
-    );
-
-    const site_name = firstNonEmpty(
-      $('meta[property="og:site_name"]').attr("content"),
-      new URL(url).hostname,
-    );
-
-    return {
-      title,
-      description,
-      image_url: resolveAbsoluteUrl(url, imageRaw ?? undefined),
-      site_name,
-    };
+    return await response.text();
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export async function fetchPageMetadata(url: string): Promise<PageMetadata> {
+  const html = await fetchPageHtml(url);
+  return extractMetadataFromHtml(html, url);
 }
 
 export function fallbackMetadata(url: string): PageMetadata {
@@ -100,4 +108,12 @@ export function fallbackMetadata(url: string): PageMetadata {
     image_url: null,
     site_name: hostname,
   };
+}
+
+export async function resolvePageMetadata(url: string): Promise<PageMetadata> {
+  try {
+    return await fetchPageMetadata(url);
+  } catch {
+    return fallbackMetadata(url);
+  }
 }

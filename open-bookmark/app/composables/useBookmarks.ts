@@ -5,12 +5,16 @@ import type {
   CreateBookmarkResponse,
   TagsResponse,
 } from "../../shared/types/bookmark";
+import {
+  DEFAULT_PAGE_SIZE,
+  PAGE_SIZE_OPTIONS,
+} from "../../shared/constants/pagination";
 
-export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
+export { PAGE_SIZE_OPTIONS };
 
 export function useBookmarks() {
   const page = useState("bookmarks-page", () => 1);
-  const pageSize = useState("bookmarks-page-size", () => 10);
+  const pageSize = useState("bookmarks-page-size", () => DEFAULT_PAGE_SIZE);
   const search = useState("bookmarks-search", () => "");
   const tag = useState<string | undefined>("bookmarks-tag", () => undefined);
   const debouncedSearch = useState("bookmarks-debounced-search", () => "");

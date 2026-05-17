@@ -27,7 +27,7 @@ export function getDb(): Database.Database {
   return db;
 }
 
-function initSchema(database: Database.Database): void {
+export function initSchema(database: Database.Database): void {
   database.exec(`
     CREATE TABLE IF NOT EXISTS bookmarks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

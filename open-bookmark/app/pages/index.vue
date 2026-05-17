@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Bookmark } from "../../shared/types/bookmark";
+import { extractFetchError } from "../utils/extractFetchError";
 
 useHead({
   title: "Open-Bookmark",
@@ -39,9 +40,10 @@ async function handleRefresh(bookmark: Bookmark) {
       description: bookmark.title ?? bookmark.url,
       color: "success",
     });
-  } catch {
+  } catch (error: unknown) {
     toast.add({
       title: "Aktualisierung fehlgeschlagen",
+      description: extractFetchError(error, "Aktualisierung fehlgeschlagen"),
       color: "error",
     });
   }
@@ -54,9 +56,10 @@ async function handleDelete(bookmark: Bookmark) {
       title: "Lesezeichen gelöscht",
       color: "success",
     });
-  } catch {
+  } catch (error: unknown) {
     toast.add({
       title: "Löschen fehlgeschlagen",
+      description: extractFetchError(error, "Löschen fehlgeschlagen"),
       color: "error",
     });
   }

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import type { BulkImportResult } from "../../shared/types/bookmark";
+import { extractFetchError } from "../utils/extractFetchError";
 
 const open = defineModel<boolean>("open", { default: false });
 
-const {
-  createBookmark,
-  bulkImport,
-} = useBookmarks();
+const { createBookmark, bulkImport } = useBookmarks();
+const { parseTagsFromInput, buildNotesPayload, validateUrlNotEmpty } = useBookmarkForm();
 
 const activeTab = ref("single");
 const tabItems = [
@@ -38,17 +37,11 @@ watch(open, (isOpen) => {
   }
 });
 
-function parseTags(): string[] {
-  return tagsInput.value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-}
-
 async function submitSingle() {
   fieldError.value = null;
-  if (!url.value.trim()) {
-    fieldError.value = "Bitte eine URL eingeben.";
+  const urlError = validateUrlNotEmpty(url.value);
+  if (urlError) {
+    fieldError.value = urlError;
     return;
   }
 
@@ -56,12 +49,12 @@ async function submitSingle() {
   try {
     await createBookmark({
       url: url.value.trim(),
-      notes: notes.value.trim() || null,
-      tags: parseTags(),
+      notes: buildNotesPayload(notes.value),
+      tags: parseTagsFromInput(tagsInput.value),
     });
     open.value = false;
   } catch (error: unknown) {
-    fieldError.value = extractErrorMessage(error);
+    fieldError.value = extractFetchError(error);
   } finally {
     submitting.value = false;
   }
@@ -78,23 +71,10 @@ async function submitBulk() {
   try {
     bulkSummary.value = await bulkImport(bulkUrls.value.trim());
   } catch (error: unknown) {
-    fieldError.value = extractErrorMessage(error);
+    fieldError.value = extractFetchError(error);
   } finally {
     submitting.value = false;
   }
-}
-
-function extractErrorMessage(error: unknown): string {
-  if (error && typeof error === "object" && "data" in error) {
-    const data = (error as { data?: { statusMessage?: string } }).data;
-    if (data?.statusMessage) {
-      return data.statusMessage;
-    }
-  }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Speichern fehlgeschlagen.";
 }
 </script>
 
@@ -104,22 +84,12 @@ function extractErrorMessage(error: unknown): string {
       <UTabs v-model="activeTab" :items="tabItems" class="mb-4 w-full">
         <template #content="{ item }">
           <div v-if="item.value === 'single'" class="flex w-full flex-col gap-4 pt-2">
-            <UFormField label="URL" required :error="fieldError ?? undefined">
-              <UInput
-                v-model="url"
-                type="url"
-                placeholder="https://example.com"
-                autocomplete="url"
-              />
-            </UFormField>
-
-            <UFormField label="Tags" hint="Kommagetrennt">
-              <UInput v-model="tagsInput" placeholder="nuxt, docs, lesen" />
-            </UFormField>
-
-            <UFormField label="Notizen">
-              <MarkdownNotesField v-model="notes" />
-            </UFormField>
+            <BookmarkFormFields
+              v-model:url="url"
+              v-model:tags-input="tagsInput"
+              v-model:notes="notes"
+              :field-error="fieldError"
+            />
 
             <UButton
               label="Speichern"

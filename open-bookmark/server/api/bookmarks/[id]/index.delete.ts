@@ -1,27 +1,21 @@
-import { deleteBookmark } from "../../../utils/bookmarks";
-import { bookmarkIdParamSchema } from "../../../utils/validation";
+import { createBookmarkService } from "../../../domain/createBookmarkService";
+import { BookmarkDomainError } from "../../../../shared/errors/bookmarkErrors";
+import { mapBookmarkErrorToH3 } from "../../../utils/http/mapBookmarkError";
+import { parseBookmarkId } from "../../../utils/http/parseRouteParams";
 
 export default defineEventHandler((event) => {
-  const params = bookmarkIdParamSchema.safeParse({
-    id: getRouterParam(event, "id"),
-  });
+  const id = parseBookmarkId(event);
 
-  if (!params.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Ungültige Bookmark-ID.",
-    });
+  try {
+    const deleted = createBookmarkService().delete(id);
+
+    if (!deleted) {
+      throw new BookmarkDomainError("NOT_FOUND");
+    }
+
+    setResponseStatus(event, 204);
+    return null;
+  } catch (error) {
+    mapBookmarkErrorToH3(error);
   }
-
-  const deleted = deleteBookmark(params.data.id);
-
-  if (!deleted) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Bookmark nicht gefunden.",
-    });
-  }
-
-  setResponseStatus(event, 204);
-  return null;
 });

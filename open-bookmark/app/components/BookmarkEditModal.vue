@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { extractFetchError } from "../utils/extractFetchError";
+
 const open = defineModel<boolean>("open", { default: false });
 
 const { editingBookmark, editingId, closeEdit } = useBookmarkModals();
 const { updateBookmark } = useBookmarks();
+const { parseTagsFromInput, buildNotesPayload, validateUrlNotEmpty } = useBookmarkForm();
 
 const url = ref("");
 const originalUrl = ref("");
@@ -25,13 +28,6 @@ watch(
   { immediate: true },
 );
 
-function parseTags(): string[] {
-  return tagsInput.value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-}
-
 async function submit() {
   const id = editingId.value;
   if (id == null) {
@@ -40,19 +36,20 @@ async function submit() {
   }
 
   fieldError.value = null;
-  const trimmedUrl = url.value.trim();
-  if (!trimmedUrl) {
-    fieldError.value = "Bitte eine URL eingeben.";
+  const urlError = validateUrlNotEmpty(url.value);
+  if (urlError) {
+    fieldError.value = urlError;
     return;
   }
 
+  const trimmedUrl = url.value.trim();
   const payload: {
     url?: string;
     notes: string | null;
     tags: string[];
   } = {
-    notes: notes.value.trim() || null,
-    tags: parseTags(),
+    notes: buildNotesPayload(notes.value),
+    tags: parseTagsFromInput(tagsInput.value),
   };
 
   if (trimmedUrl !== originalUrl.value.trim()) {
@@ -65,32 +62,10 @@ async function submit() {
     closeEdit();
     open.value = false;
   } catch (error: unknown) {
-    fieldError.value = extractErrorMessage(error);
+    fieldError.value = extractFetchError(error);
   } finally {
     submitting.value = false;
   }
-}
-
-function extractErrorMessage(error: unknown): string {
-  if (error && typeof error === "object") {
-    const fetchError = error as {
-      data?: { statusMessage?: string; message?: string };
-      statusMessage?: string;
-    };
-    if (fetchError.data?.statusMessage) {
-      return fetchError.data.statusMessage;
-    }
-    if (fetchError.data?.message) {
-      return fetchError.data.message;
-    }
-    if (fetchError.statusMessage) {
-      return fetchError.statusMessage;
-    }
-  }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Speichern fehlgeschlagen.";
 }
 </script>
 
@@ -98,26 +73,14 @@ function extractErrorMessage(error: unknown): string {
   <UModal v-model:open="open" title="Lesezeichen bearbeiten">
     <template #body>
       <div v-if="editingBookmark" class="flex w-full flex-col gap-4">
-        <UFormField label="URL" required :error="fieldError ?? undefined">
-          <UInput
-            v-model="url"
-            type="url"
-            placeholder="https://example.com"
-            autocomplete="url"
-          />
-        </UFormField>
-
-        <UFormField label="Tags" hint="Kommagetrennt">
-          <UInput v-model="tagsInput" placeholder="nuxt, docs, lesen" />
-        </UFormField>
-
-        <UFormField label="Notizen">
-          <MarkdownNotesField
-            :key="editingBookmark.id"
-            v-model="notes"
-            default-mode="preview"
-          />
-        </UFormField>
+        <BookmarkFormFields
+          v-model:url="url"
+          v-model:tags-input="tagsInput"
+          v-model:notes="notes"
+          :field-error="fieldError"
+          :notes-field-key="editingBookmark.id"
+          notes-default-mode="preview"
+        />
 
         <div class="flex justify-end gap-2">
           <UButton

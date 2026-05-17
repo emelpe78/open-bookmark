@@ -10,15 +10,16 @@ withDefaults(
   },
 );
 
+import { PAGE_SIZE_OPTIONS } from "../composables/useBookmarks";
+
 const page = defineModel<number>("page", { required: true });
 const pageSize = defineModel<number>("pageSize", { required: true });
 
-const pageSizeSelectItems = [
-  { label: "10 pro Seite", value: 10 },
-  { label: "25 pro Seite", value: 25 },
-  { label: "50 pro Seite", value: 50 },
-  { label: "100 pro Seite", value: 100 },
-];
+const pageSizeSelectItems: Array<{ label: string; value: number }> =
+  PAGE_SIZE_OPTIONS.map((size) => ({
+    label: `${size} pro Seite`,
+    value: size,
+  }));
 </script>
 
 <template>

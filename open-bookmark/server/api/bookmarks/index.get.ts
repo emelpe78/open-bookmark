@@ -1,4 +1,5 @@
-import { listBookmarks } from "../../utils/bookmarks";
+import { createBookmarkService } from "../../domain/createBookmarkService";
+import { mapBookmarkErrorToH3 } from "../../utils/http/mapBookmarkError";
 import { listBookmarksQuerySchema } from "../../utils/validation";
 
 export default defineEventHandler((event) => {
@@ -12,5 +13,9 @@ export default defineEventHandler((event) => {
     });
   }
 
-  return listBookmarks(parsed.data);
+  try {
+    return createBookmarkService().list(parsed.data);
+  } catch (error) {
+    mapBookmarkErrorToH3(error);
+  }
 });

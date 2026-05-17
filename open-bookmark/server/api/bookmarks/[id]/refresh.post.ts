@@ -1,18 +1,14 @@
-import { refreshBookmarkMetadata } from "../../../utils/bookmarks";
-import { bookmarkIdParamSchema } from "../../../utils/validation";
+import { createBookmarkService } from "../../../domain/createBookmarkService";
+import { mapBookmarkErrorToH3 } from "../../../utils/http/mapBookmarkError";
+import { parseBookmarkId } from "../../../utils/http/parseRouteParams";
 
 export default defineEventHandler(async (event) => {
-  const params = bookmarkIdParamSchema.safeParse({
-    id: getRouterParam(event, "id"),
-  });
+  const id = parseBookmarkId(event);
 
-  if (!params.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Ungültige Bookmark-ID.",
-    });
+  try {
+    const bookmark = await createBookmarkService().refreshMetadata(id);
+    return { bookmark };
+  } catch (error) {
+    mapBookmarkErrorToH3(error);
   }
-
-  const bookmark = await refreshBookmarkMetadata(params.data.id);
-  return { bookmark };
 });

@@ -1,9 +1,19 @@
 import { z } from "zod";
+import {
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+} from "../../shared/constants/pagination";
 
 export const listBookmarksQuerySchema = z.object({
   search: z.string().optional(),
   page: z.coerce.number().int().min(1).optional().default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).optional().default(10),
+  pageSize: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_PAGE_SIZE)
+    .optional()
+    .default(DEFAULT_PAGE_SIZE),
   tag: z.string().optional(),
 });
 

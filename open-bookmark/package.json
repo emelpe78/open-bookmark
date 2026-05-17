@@ -8,7 +8,9 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview --port 3777",
     "postinstall": "nuxt prepare",
-    "typecheck": "nuxt prepare && vue-tsc -p .nuxt/tsconfig.app.json --noEmit && vue-tsc -p .nuxt/tsconfig.server.json --noEmit"
+    "typecheck": "nuxt prepare && vue-tsc -p .nuxt/tsconfig.app.json --noEmit && vue-tsc -p .nuxt/tsconfig.server.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@nuxt/icon": "^1.15.0",
@@ -28,6 +30,7 @@
     "@iconify-json/lucide": "^1.2.108",
     "@types/better-sqlite3": "^7.6.13",
     "typescript": "~5.8.3",
+    "vitest": "^3.2.4",
     "vue-tsc": "^2.2.10"
   }
 }
