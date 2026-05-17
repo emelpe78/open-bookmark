@@ -34,7 +34,6 @@ docs/
 # Lokale Tooling & AI (nicht im öffentlichen Repo)
 /tsconfig.json
 skills-lock.json
-AGENTS.md
 CONTEXT.md
 .agents/
 .out-of-scope/

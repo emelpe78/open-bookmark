@@ -65,14 +65,13 @@ Siehe [`open-bookmark/.env.example`](open-bookmark/.env.example).
 | `GET` | `/api/tags` | Tags mit Anzahl |
 | `POST` | `/api/bookmarks/:id/refresh` | Metadaten neu laden |
 
-## Dokumentation
+## Repository-Struktur
 
-| Pfad | Inhalt |
-|------|--------|
-| [`docs/PRD_OpenBookmark.md`](docs/PRD_OpenBookmark.md) | Product Requirements Document |
-| [`docs/markdown_eingabemoeglichkeiten_spickzettel.md`](docs/markdown_eingabemoeglichkeiten_spickzettel.md) | Markdown-Spickzettel für Notizen |
-| [`AGENTS.md`](AGENTS.md) | Leitfaden für AI-Agents und MVP-Regeln |
-| [`CONTEXT.md`](CONTEXT.md) | Domänen-Glossar (Projekt-Sprache) |
+```
+open-bookmark/          # Nuxt-App (Quellcode, package.json, Dockerfile)
+docker-compose.yml      # Container-Setup
+README.md               # Diese Datei
+```
 
 ## Ressourcen (Design & Skills)
 
@@ -81,12 +80,3 @@ Siehe [`open-bookmark/.env.example`](open-bookmark/.env.example).
 - [Frontend Design Skill](https://skills.sh/anthropics/skills/frontend-design)
 - [UI/UX Pro Max Skill](https://skills.sh/nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max)
 - [LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
-
-## Repository-Struktur
-
-```
-open-bookmark/          # Nuxt-App (Quellcode, package.json)
-docs/                   # PRD und weitere Docs
-docker-compose.yml      # Container-Setup
-AGENTS.md               # Agent-/Contributor-Regeln
-```
