@@ -1,8 +1,8 @@
 # Open Bookmark
 
-Lokal betriebene Lesezeichen-App mit automatischer Metadaten-Extraktion, Tags, Markdown-Notizen und Kartenansicht.
+**Local-first** Bookmark-Manager für macOS: URLs speichern (einzeln oder als Liste), Metadaten automatisch vom Web holen, mit **Tags** und **Listen** ordnen, **Markdown-Notizen** ergänzen und in der Kartenansicht durchsuchen — ohne Account, Daten in **SQLite** auf deinem Rechner.
 
-Technologie: **Nuxt 4**, **Nuxt UI**, **SQLite** (`better-sqlite3`), **Electron** (macOS Desktop). Die Web-App liegt im Ordner [`open-bookmark/`](open-bookmark/).
+**Desktop-App** (Electron) und **Chrome-Extension** (Side-Load) nutzen dieselbe lokale API (`127.0.0.1:3777`). Oberfläche und Server: **Nuxt 4** mit **Nuxt UI** im Ordner [`open-bookmark/`](open-bookmark/).
 
 ## Inhalt
 
