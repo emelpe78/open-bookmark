@@ -1,6 +1,6 @@
 {
   "name": "open-bookmark",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Local-first Bookmark-Manager — Nuxt-4-Oberfläche und Nitro-API mit SQLite",
   "author": "Marc Lettau-Poelchen (https://github.com/emelpe78)",

@@ -1,7 +1,7 @@
 {
   "name": "open-bookmark-extension",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Chrome-Extension (MV3) zum Speichern von Seiten in der lokalen Open-Bookmark-Instanz",
   "author": "Marc Lettau-Poelchen (https://github.com/emelpe78)",
   "license": "MIT",
