@@ -50,3 +50,4 @@ CONTEXT.md
 .scratch/
 scripts/
 !desktop/scripts/
+!extension/scripts/
