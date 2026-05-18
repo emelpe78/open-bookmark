@@ -30,5 +30,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Datenbank-Einstellungen, SQL-Backup, Desktop-Preferences und Pfadwechsel.
 
-[1.0.0]: https://github.com/open-bookmark/open-bookmark/releases/tag/v1.0.0
-[0.4.0]: https://github.com/open-bookmark/open-bookmark/releases/tag/v0.4.0
+[1.0.0]: https://github.com/emelpe78/open-bookmark/releases/tag/v1.0.0
+[0.4.0]: https://github.com/emelpe78/open-bookmark/releases/tag/v0.4.0
