@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenBookmark</title>
+    <link rel="stylesheet" href="./popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header class="popup__header">
+        <h1 class="popup__title">OpenBookmark</h1>
+      </header>
+
+      <section class="popup__page" aria-label="Aktuelle Seite">
+        <p id="page-title" class="popup__page-title">…</p>
+        <p id="page-url" class="popup__page-url">…</p>
+      </section>
+
+      <label class="popup__field">
+        <span class="popup__label">Tags (optional)</span>
+        <input
+          id="tags"
+          class="popup__input"
+          type="text"
+          list="tag-suggestions"
+          placeholder="nuxt, docs, lesen"
+          autocomplete="off"
+        />
+        <datalist id="tag-suggestions"></datalist>
+        <span class="popup__hint">Kommagetrennt. Neue Tags werden beim Speichern angelegt.</span>
+      </label>
+
+      <label class="popup__field">
+        <span class="popup__label">Notiz (optional)</span>
+        <textarea
+          id="notes"
+          class="popup__textarea"
+          rows="3"
+          placeholder="Kurzer Markdown-Hinweis…"
+        ></textarea>
+      </label>
+
+      <button
+        id="save-btn"
+        type="button"
+        class="popup__btn popup__btn--primary"
+        disabled
+      >
+        Speichern
+      </button>
+
+      <p id="status" class="popup__status" role="status" aria-live="polite"></p>
+
+      <div id="duplicate-actions" class="popup__duplicate" hidden>
+        <p class="popup__duplicate-text">
+          Diese Seite ist bereits gespeichert.
+        </p>
+        <div class="popup__duplicate-buttons">
+          <button id="duplicate-open-app" type="button" class="popup__btn popup__btn--secondary">
+            In OpenBookmark öffnen
+          </button>
+          <button
+            id="duplicate-refresh"
+            type="button"
+            class="popup__btn popup__btn--secondary"
+            hidden
+          >
+            Metadaten aktualisieren
+          </button>
+        </div>
+      </div>
+
+      <footer class="popup__footer">
+        <button id="open-app" type="button" class="popup__link">
+          In OpenBookmark öffnen
+        </button>
+        <button id="open-options" type="button" class="popup__link">
+          Einstellungen
+        </button>
+      </footer>
+    </main>
+    <script type="module" src="./popup.ts"></script>
+  </body>
+</html>

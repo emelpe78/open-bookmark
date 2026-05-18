@@ -67,10 +67,17 @@ Siehe [`open-bookmark/.env.example`](open-bookmark/.env.example).
 | `GET` | `/api/tags` | Tags mit Anzahl |
 | `POST` | `/api/bookmarks/:id/refresh` | Metadaten neu laden |
 
+## Chrome Extension
+
+Die Browser-Extension liegt in [`extension/`](extension/). Sie speichert Seiten und Links per `POST /api/bookmarks` in deiner konfigurierten Instanz.
+
+Kurzanleitung: [`extension/README.md`](extension/README.md) (Build, Installation als entpackte Erweiterung, Server-URL).
+
 ## Repository-Struktur
 
 ```
 open-bookmark/          # Nuxt-App (Quellcode, package.json, Dockerfile)
+extension/              # Chrome Extension (Manifest V3)
 docker-compose.yml      # Container-Setup
 README.md               # Diese Datei
 ```

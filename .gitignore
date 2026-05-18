@@ -3,6 +3,10 @@ node_modules/
 .nuxt/
 .output/
 dist/
+
+# Chrome Extension
+extension/node_modules/
+extension/dist/
 *.log
 
 # Secrets & lokale Umgebungen
