@@ -5,6 +5,7 @@ import type {
   CreateBookmarkResponse,
   TagsResponse,
 } from "#shared/types/bookmark";
+import type { ListsResponse } from "#shared/types/list";
 import {
   DEFAULT_PAGE_SIZE,
   PAGE_SIZE_OPTIONS,
@@ -17,6 +18,7 @@ export function useBookmarks() {
   const pageSize = useState("bookmarks-page-size", () => DEFAULT_PAGE_SIZE);
   const search = useState("bookmarks-search", () => "");
   const tag = useState<string | undefined>("bookmarks-tag", () => undefined);
+  const list = useState<string | undefined>("bookmarks-list", () => undefined);
   const debouncedSearch = useState("bookmarks-debounced-search", () => "");
 
   let searchTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -36,6 +38,10 @@ export function useBookmarks() {
       page.value = 1;
     });
 
+    watch(list, () => {
+      page.value = 1;
+    });
+
     watch(pageSize, () => {
       page.value = 1;
     });
@@ -46,6 +52,7 @@ export function useBookmarks() {
     pageSize: pageSize.value,
     search: debouncedSearch.value || undefined,
     tag: tag.value || undefined,
+    list: list.value || undefined,
   }));
 
   const {
@@ -59,11 +66,13 @@ export function useBookmarks() {
   });
 
   const { data: tagsData, refresh: refreshTags } = useFetch<TagsResponse>("/api/tags");
+  const { data: listsData, refresh: refreshLists } =
+    useFetch<ListsResponse>("/api/lists");
 
   if (import.meta.client) {
     const { start: startAutoSync } = useBookmarkListAutoSync({
       onChanged: async () => {
-        await Promise.all([refresh(), refreshTags()]);
+        await Promise.all([refresh(), refreshTags(), refreshLists()]);
       },
     });
     startAutoSync();
@@ -76,6 +85,37 @@ export function useBookmarks() {
     })),
   );
 
+  const listOptions = computed(() =>
+    (listsData.value?.lists ?? []).map((entry) => ({
+      label: `${entry.name} (${entry.count})`,
+      value: entry.name,
+    })),
+  );
+
+  const listPickerOptions = computed(() =>
+    (listsData.value?.lists ?? []).map((entry) => ({
+      label: `${entry.name} (${entry.count})`,
+      value: String(entry.id),
+    })),
+  );
+
+  const hasTags = computed(() => tagOptions.value.length > 0);
+  const hasLists = computed(() => listOptions.value.length > 0);
+
+  if (import.meta.client) {
+    watch(hasTags, (present) => {
+      if (!present) {
+        tag.value = undefined;
+      }
+    });
+
+    watch(hasLists, (present) => {
+      if (!present) {
+        list.value = undefined;
+      }
+    });
+  }
+
   async function createBookmark(payload: {
     url: string;
     notes?: string | null;
@@ -85,7 +125,7 @@ export function useBookmarks() {
       method: "POST",
       body: payload,
     });
-    await Promise.all([refresh(), refreshTags()]);
+    await Promise.all([refresh(), refreshTags(), refreshLists()]);
     return result.bookmark;
   }
 
@@ -94,7 +134,7 @@ export function useBookmarks() {
       method: "POST",
       body: { urls },
     });
-    await Promise.all([refresh(), refreshTags()]);
+    await Promise.all([refresh(), refreshTags(), refreshLists()]);
     return result;
   }
 
@@ -106,13 +146,13 @@ export function useBookmarks() {
       method: "PATCH",
       body: payload,
     });
-    await Promise.all([refresh(), refreshTags()]);
+    await Promise.all([refresh(), refreshTags(), refreshLists()]);
     return result.bookmark;
   }
 
   async function deleteBookmark(id: number): Promise<void> {
     await $fetch(`/api/bookmarks/${id}`, { method: "DELETE" });
-    await Promise.all([refresh(), refreshTags()]);
+    await Promise.all([refresh(), refreshTags(), refreshLists()]);
   }
 
   async function deleteBookmarks(ids: number[]): Promise<void> {
@@ -122,7 +162,7 @@ export function useBookmarks() {
     await Promise.all(
       ids.map((id) => $fetch(`/api/bookmarks/${id}`, { method: "DELETE" })),
     );
-    await Promise.all([refresh(), refreshTags()]);
+    await Promise.all([refresh(), refreshTags(), refreshLists()]);
   }
 
   async function refreshBookmarkMetadata(id: number): Promise<Bookmark> {
@@ -134,7 +174,7 @@ export function useBookmarks() {
   }
 
   async function refreshViews(): Promise<void> {
-    await Promise.all([refresh(), refreshTags()]);
+    await Promise.all([refresh(), refreshTags(), refreshLists()]);
   }
 
   return {
@@ -142,7 +182,12 @@ export function useBookmarks() {
     pageSize,
     search,
     tag,
+    list,
     tagOptions,
+    listOptions,
+    listPickerOptions,
+    hasTags,
+    hasLists,
     bookmarks: computed(() => data.value?.items ?? []),
     total: computed(() => data.value?.total ?? 0),
     pending,

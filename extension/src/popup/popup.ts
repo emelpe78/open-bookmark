@@ -2,7 +2,7 @@ import { resolveActivePageUrl } from "../lib/activeTab";
 import { getServerBaseUrl, originPatternFromBaseUrl } from "../lib/config";
 import { findBookmarkByUrl } from "../lib/findBookmarkByUrl";
 import { mapApiErrorToUserMessage } from "../lib/mapApiError";
-import { refreshBookmark } from "../lib/openBookmarkApi";
+import { listLists, refreshBookmark } from "../lib/openBookmarkApi";
 import { saveOrUpdateBookmark } from "../lib/saveBookmark";
 import { attachTagAutocomplete } from "../lib/tagAutocomplete";
 import { refreshTagCache } from "../lib/tagSuggestions";
@@ -17,6 +17,8 @@ const tagSuggestionsListEl = document.getElementById(
 
 const tagAutocomplete = attachTagAutocomplete(tagsEl, tagSuggestionsListEl);
 const notesEl = document.getElementById("notes") as HTMLTextAreaElement;
+const listFieldEl = document.getElementById("list-field")!;
+const listSelectEl = document.getElementById("list-select") as HTMLSelectElement;
 const saveBtn = document.getElementById("save-btn") as HTMLButtonElement;
 const statusEl = document.getElementById("status")!;
 const duplicateActionsEl = document.getElementById("duplicate-actions")!;
@@ -31,6 +33,53 @@ const openOptionsBtn = document.getElementById("open-options") as HTMLButtonElem
 
 let duplicateBookmarkId: number | null = null;
 let currentPageUrl = "";
+const listNameById = new Map<number, string>();
+
+function getSelectedListId(): number | null {
+  const value = listSelectEl.value;
+  if (!value) {
+    return null;
+  }
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+async function loadLists(): Promise<void> {
+  listFieldEl.hidden = true;
+  listNameById.clear();
+  listSelectEl.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "— keine Liste —";
+  listSelectEl.appendChild(placeholder);
+
+  const baseUrl = await getServerBaseUrl();
+  const hasPermission = await chrome.permissions.contains({
+    origins: [originPatternFromBaseUrl(baseUrl)],
+  });
+  if (!hasPermission) {
+    return;
+  }
+
+  try {
+    const lists = await listLists(baseUrl);
+    if (lists.length === 0) {
+      return;
+    }
+
+    for (const list of lists) {
+      listNameById.set(list.id, list.name);
+      const option = document.createElement("option");
+      option.value = String(list.id);
+      option.textContent = list.name;
+      listSelectEl.appendChild(option);
+    }
+
+    listFieldEl.hidden = false;
+  } catch {
+    // Listen sind optional; bei Fehler ausblenden.
+  }
+}
 
 function setStatus(
   message: string,
@@ -121,6 +170,7 @@ async function loadActiveTab() {
 
   tagsEl.value = "";
   notesEl.value = "";
+  listSelectEl.value = "";
 
   if (url) {
     await loadExistingBookmarkForm(url);
@@ -141,17 +191,29 @@ saveBtn.addEventListener("click", async () => {
   setStatus("Speichern…", "loading");
 
   try {
+    const listId = getSelectedListId();
     const result = await saveOrUpdateBookmark(url, {
       notes: notesEl.value,
       tags: tagsEl.value,
+      listId,
     });
     const tagHint =
       result.bookmark.tags.length > 0
         ? ` Tags: ${result.bookmark.tags.join(", ")}.`
         : "";
-    const message = result.updated
-      ? `Bookmark aktualisiert.${tagHint}`
-      : `Bookmark gespeichert.${tagHint}`;
+    const listName = listId ? listNameById.get(listId) : undefined;
+    const listHint =
+      result.addedToList && listName
+        ? ` Zur Liste „${listName}" hinzugefügt.`
+        : "";
+    let message: string;
+    if (result.addedToList && !result.created && !result.updated) {
+      message = `Zur Liste „${listName ?? "Liste"}" hinzugefügt.`;
+    } else if (result.updated) {
+      message = `Bookmark aktualisiert.${tagHint}${listHint}`;
+    } else {
+      message = `Bookmark gespeichert.${tagHint}${listHint}`;
+    }
     setStatus(message, "success");
     const baseUrl = await getServerBaseUrl();
     await refreshTagCache(baseUrl);
@@ -211,4 +273,6 @@ openAppBtn.addEventListener("click", () => {
   void openApp();
 });
 
-void loadActiveTab();
+void (async () => {
+  await Promise.all([loadLists(), loadActiveTab()]);
+})();

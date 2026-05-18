@@ -8,6 +8,7 @@ import {
   BookmarkRepository,
   type ListBookmarksOptions,
 } from "../repositories/bookmarkRepository";
+import { ListRepository } from "../repositories/listRepository";
 import { TagRepository } from "../repositories/tagRepository";
 
 export type CreateFromUrlResult = "created" | "skipped" | { failed: string };
@@ -15,31 +16,35 @@ export type CreateFromUrlResult = "created" | "skipped" | { failed: string };
 export interface BookmarkServiceDeps {
   bookmarkRepo: BookmarkRepository;
   tagRepo: TagRepository;
+  listRepo: ListRepository;
   resolveMetadata?: (url: string) => Promise<PageMetadata>;
 }
 
 export class BookmarkService {
   private readonly bookmarkRepo: BookmarkRepository;
   private readonly tagRepo: TagRepository;
+  private readonly listRepo: ListRepository;
   private readonly resolveMetadata: (url: string) => Promise<PageMetadata>;
 
   constructor(deps: BookmarkServiceDeps) {
     this.bookmarkRepo = deps.bookmarkRepo;
     this.tagRepo = deps.tagRepo;
+    this.listRepo = deps.listRepo;
     this.resolveMetadata = deps.resolveMetadata ?? resolvePageMetadata;
   }
 
   list(options: ListBookmarksOptions = {}) {
     const listResult = this.bookmarkRepo.list(options, new Map());
-    const tagsByBookmarkId = this.tagRepo.getTagsForBookmarks(
-      listResult.items.map((item) => item.id),
-    );
+    const bookmarkIds = listResult.items.map((item) => item.id);
+    const tagsByBookmarkId = this.tagRepo.getTagsForBookmarks(bookmarkIds);
+    const listsByBookmarkId = this.listRepo.getListNamesForBookmarks(bookmarkIds);
 
     return {
       ...listResult,
       items: listResult.items.map((item) => ({
         ...item,
         tags: tagsByBookmarkId.get(item.id) ?? [],
+        lists: listsByBookmarkId.get(item.id) ?? [],
       })),
     };
   }
@@ -51,7 +56,16 @@ export class BookmarkService {
   getById(id: number): Bookmark | null {
     const tags = this.tagRepo.getTagsForBookmark(id);
     const tagsMap = new Map([[id, tags]]);
-    return this.bookmarkRepo.findById(id, tagsMap);
+    const bookmark = this.bookmarkRepo.findById(id, tagsMap);
+    if (!bookmark) {
+      return null;
+    }
+
+    const listsByBookmarkId = this.listRepo.getListNamesForBookmarks([id]);
+    return {
+      ...bookmark,
+      lists: listsByBookmarkId.get(id) ?? [],
+    };
   }
 
   async create(input: {
@@ -236,6 +250,69 @@ export class BookmarkService {
     const deleted = this.tagRepo.delete(id);
     if (!deleted) {
       throw new BookmarkDomainError("TAG_NOT_FOUND");
+    }
+  }
+
+  listLists() {
+    return this.listRepo.listWithCounts();
+  }
+
+  getList(id: number) {
+    const list = this.listRepo.getDetail(id);
+    if (!list) {
+      throw new BookmarkDomainError("LIST_NOT_FOUND");
+    }
+    return list;
+  }
+
+  createList(name: string, bookmarkIds: number[]) {
+    const list = this.listRepo.create(name, bookmarkIds);
+    return this.listRepo.getWithCount(list.id)!;
+  }
+
+  addBookmarksToList(listId: number, bookmarkIds: number[]) {
+    const list = this.listRepo.addBookmarks(listId, bookmarkIds);
+    return this.listRepo.getWithCount(list.id)!;
+  }
+
+  setListBookmarks(listId: number, bookmarkIds: number[]) {
+    this.listRepo.setBookmarks(listId, bookmarkIds);
+    return this.getList(listId);
+  }
+
+  updateList(
+    id: number,
+    input: {
+      name?: string;
+      bookmarkIds?: number[];
+      addBookmarkIds?: number[];
+    },
+  ) {
+    if (input.name !== undefined) {
+      this.listRepo.updateName(id, input.name);
+    }
+    if (input.bookmarkIds !== undefined) {
+      this.listRepo.setBookmarks(id, input.bookmarkIds);
+    }
+    if (input.addBookmarkIds && input.addBookmarkIds.length > 0) {
+      this.listRepo.addBookmarks(id, input.addBookmarkIds);
+    }
+    return this.getList(id);
+  }
+
+  updateListName(id: number, name: string) {
+    this.listRepo.updateName(id, name);
+    const list = this.listRepo.getWithCount(id);
+    if (!list) {
+      throw new BookmarkDomainError("LIST_NOT_FOUND");
+    }
+    return list;
+  }
+
+  deleteList(id: number): void {
+    const deleted = this.listRepo.delete(id);
+    if (!deleted) {
+      throw new BookmarkDomainError("LIST_NOT_FOUND");
     }
   }
 }

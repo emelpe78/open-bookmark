@@ -5,7 +5,11 @@ import {
 } from "./bookmarkFormChanges";
 import { findBookmarkByUrl } from "./findBookmarkByUrl";
 import { mapApiErrorToUserMessage } from "./mapApiError";
-import { createBookmark, updateBookmark } from "./openBookmarkApi";
+import {
+  addBookmarksToList,
+  createBookmark,
+  updateBookmark,
+} from "./openBookmarkApi";
 import type { Bookmark } from "./types";
 import { OpenBookmarkApiError } from "./types";
 import { parseTagInput } from "./parseTagInput";
@@ -13,12 +17,14 @@ import { parseTagInput } from "./parseTagInput";
 export interface SaveBookmarkOptions {
   notes?: string | null;
   tags?: string | null;
+  listId?: number | null;
 }
 
 export interface SaveBookmarkResult {
   bookmark: Bookmark;
   created: boolean;
   updated: boolean;
+  addedToList: boolean;
 }
 
 async function ensureHostAccess(baseUrl: string): Promise<void> {
@@ -46,6 +52,16 @@ export async function saveOrUpdateBookmark(
 
     if (existing) {
       if (!hasBookmarkFormChanges(existing, tagsInput, notesInput)) {
+        if (options.listId) {
+          await addBookmarksToList(baseUrl, options.listId, [existing.id]);
+          return {
+            bookmark: existing,
+            created: false,
+            updated: false,
+            addedToList: true,
+          };
+        }
+
         throw new OpenBookmarkApiError(
           "duplicate",
           "Diese Seite ist bereits in Open Bookmark gespeichert.",
@@ -57,7 +73,14 @@ export async function saveOrUpdateBookmark(
         notes: buildNotesPayload(notesInput),
         tags: parseTagInput(tagsInput),
       });
-      return { bookmark, created: false, updated: true };
+
+      let addedToList = false;
+      if (options.listId) {
+        await addBookmarksToList(baseUrl, options.listId, [bookmark.id]);
+        addedToList = true;
+      }
+
+      return { bookmark, created: false, updated: true, addedToList };
     }
 
     const bookmark = await createBookmark(baseUrl, {
@@ -65,7 +88,14 @@ export async function saveOrUpdateBookmark(
       notes: notesInput,
       tags: tagsInput,
     });
-    return { bookmark, created: true, updated: false };
+
+    let addedToList = false;
+    if (options.listId) {
+      await addBookmarksToList(baseUrl, options.listId, [bookmark.id]);
+      addedToList = true;
+    }
+
+    return { bookmark, created: true, updated: false, addedToList };
   } catch (error) {
     if (error instanceof OpenBookmarkApiError) {
       throw error;

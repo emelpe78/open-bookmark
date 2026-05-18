@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BookmarkRepository } from "../../server/repositories/bookmarkRepository";
+import { ListRepository } from "../../server/repositories/listRepository";
 import { TagRepository } from "../../server/repositories/tagRepository";
 import { createMemoryDatabase } from "../../server/utils/createMemoryDatabase";
 
@@ -45,6 +46,37 @@ describe("BookmarkRepository with tags", () => {
 
     expect(byId[id1]).toEqual(["alpha", "beta"]);
     expect(byId[id2]).toEqual(["gamma"]);
+  });
+
+  it("filters bookmarks by list name", () => {
+    const db = createMemoryDatabase();
+    const bookmarkRepo = new BookmarkRepository(db);
+    const listRepo = new ListRepository(db);
+
+    const id1 = bookmarkRepo.insert({
+      url: "https://a.com",
+      normalized_url: "https://a.com",
+      title: "A",
+      description: null,
+      image_url: null,
+      site_name: null,
+      notes: null,
+    });
+    bookmarkRepo.insert({
+      url: "https://b.com",
+      normalized_url: "https://b.com",
+      title: "B",
+      description: null,
+      image_url: null,
+      site_name: null,
+      notes: null,
+    });
+
+    listRepo.create("Lesen", [id1]);
+
+    const result = bookmarkRepo.list({ list: "Lesen" }, new Map());
+    expect(result.total).toBe(1);
+    expect(result.items[0]?.id).toBe(id1);
   });
 
   it("reports list revision from count and latest updated_at", () => {

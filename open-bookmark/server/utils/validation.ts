@@ -15,6 +15,7 @@ export const listBookmarksQuerySchema = z.object({
     .optional()
     .default(DEFAULT_PAGE_SIZE),
   tag: z.string().optional(),
+  list: z.string().optional(),
 });
 
 export const createBookmarkBodySchema = z
@@ -43,3 +44,24 @@ export const tagIdParamSchema = bookmarkIdParamSchema;
 export const tagBodySchema = z.object({
   name: z.string().trim().min(1, "Tag-Name ist erforderlich."),
 });
+
+export const listIdParamSchema = bookmarkIdParamSchema;
+
+export const listBodySchema = z.object({
+  name: z.string().trim().min(1, "Listenname ist erforderlich."),
+  bookmarkIds: z.array(z.coerce.number().int().positive()).optional().default([]),
+});
+
+export const listPatchBodySchema = z
+  .object({
+    name: z.string().trim().min(1, "Listenname ist erforderlich.").optional(),
+    bookmarkIds: z.array(z.coerce.number().int().positive()).optional(),
+    addBookmarkIds: z.array(z.coerce.number().int().positive()).optional(),
+  })
+  .refine(
+    (data) =>
+      data.name !== undefined
+      || data.bookmarkIds !== undefined
+      || (data.addBookmarkIds !== undefined && data.addBookmarkIds.length > 0),
+    { message: "name, bookmarkIds oder addBookmarkIds ist erforderlich." },
+  );

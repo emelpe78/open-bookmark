@@ -24,6 +24,7 @@ export interface ListBookmarksOptions {
   page?: number;
   pageSize?: number;
   tag?: string;
+  list?: string;
 }
 
 export interface InsertBookmarkData {
@@ -103,6 +104,15 @@ export class BookmarkRepository {
         WHERE bt.bookmark_id = b.id AND t.name = ? COLLATE NOCASE
       )`);
       params.push(options.tag.trim());
+    }
+
+    if (options.list?.trim()) {
+      conditions.push(`EXISTS (
+        SELECT 1 FROM list_bookmarks lb
+        INNER JOIN lists l ON l.id = lb.list_id
+        WHERE lb.bookmark_id = b.id AND l.name = ? COLLATE NOCASE
+      )`);
+      params.push(options.list.trim());
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
@@ -243,6 +253,6 @@ export class BookmarkRepository {
   }
 
   private mapRow(row: BookmarkRow, tags: string[]): Bookmark {
-    return { ...row, tags };
+    return { ...row, tags, lists: [] };
   }
 }

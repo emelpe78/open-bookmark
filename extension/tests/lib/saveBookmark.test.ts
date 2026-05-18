@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { findBookmarkByUrl } from "../../src/lib/findBookmarkByUrl";
-import { createBookmark, updateBookmark } from "../../src/lib/openBookmarkApi";
+import {
+  addBookmarksToList,
+  createBookmark,
+  updateBookmark,
+} from "../../src/lib/openBookmarkApi";
 import { saveOrUpdateBookmark } from "../../src/lib/saveBookmark";
 import { OpenBookmarkApiError } from "../../src/lib/types";
 
@@ -16,6 +20,7 @@ vi.mock("../../src/lib/findBookmarkByUrl", () => ({
 vi.mock("../../src/lib/openBookmarkApi", () => ({
   createBookmark: vi.fn(),
   updateBookmark: vi.fn(),
+  addBookmarksToList: vi.fn().mockResolvedValue(undefined),
 }));
 
 const existing = {
@@ -86,5 +91,23 @@ describe("saveOrUpdateBookmark", () => {
         notes: "Alt",
       }),
     ).rejects.toMatchObject({ kind: "duplicate" } satisfies Partial<OpenBookmarkApiError>);
+  });
+
+  it("adds existing bookmark to list when only listId is set", async () => {
+    vi.mocked(findBookmarkByUrl).mockResolvedValue(existing);
+
+    const result = await saveOrUpdateBookmark("https://example.com", {
+      tags: "nuxt",
+      notes: "Alt",
+      listId: 2,
+    });
+
+    expect(result.addedToList).toBe(true);
+    expect(addBookmarksToList).toHaveBeenCalledWith(
+      "http://localhost:3777",
+      2,
+      [5],
+    );
+    expect(updateBookmark).not.toHaveBeenCalled();
   });
 });

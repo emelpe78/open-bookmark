@@ -8,6 +8,9 @@ const STATUS_BY_CODE: Record<BookmarkDomainError["code"], number> = {
   EMPTY_TAG_NAME: 400,
   TAG_NOT_FOUND: 404,
   DUPLICATE_TAG_NAME: 409,
+  EMPTY_LIST_NAME: 400,
+  LIST_NOT_FOUND: 404,
+  DUPLICATE_LIST_NAME: 409,
 };
 
 export function mapBookmarkErrorToH3(error: unknown): never {

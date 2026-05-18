@@ -8,6 +8,7 @@ const activeTab = ref("general");
 const tabItems = [
   { label: "Allgemein", value: "general", icon: "i-lucide-sliders-horizontal" },
   { label: "Tags", value: "tags", icon: "i-lucide-tags" },
+  { label: "Listen", value: "lists", icon: "i-lucide-list" },
 ];
 </script>
 
@@ -18,7 +19,7 @@ const tabItems = [
         Einstellungen
       </h1>
       <p class="mt-1 text-sm text-muted">
-        App-Verhalten und Tags verwalten.
+        App-Verhalten, Tags und Listen verwalten.
       </p>
     </div>
 
@@ -29,6 +30,7 @@ const tabItems = [
             <SettingsThemeField />
           </div>
           <SettingsTagsPanel v-else-if="item.value === 'tags'" class="pt-4" />
+          <SettingsListsPanel v-else-if="item.value === 'lists'" class="pt-4" />
         </template>
       </UTabs>
     </UCard>

@@ -10,6 +10,7 @@ export interface Bookmark {
   created_at: string;
   updated_at: string;
   tags: string[];
+  lists: string[];
 }
 
 export interface BookmarkListResponse {

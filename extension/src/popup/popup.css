@@ -95,7 +95,8 @@ body {
 }
 
 .popup__input,
-.popup__textarea {
+.popup__textarea,
+.popup__select {
   width: 100%;
   padding: 8px;
   border: 1px solid var(--border);
@@ -103,6 +104,10 @@ body {
   font: inherit;
   color: inherit;
   background: var(--bg);
+}
+
+.popup__select {
+  cursor: pointer;
 }
 
 .popup__textarea {

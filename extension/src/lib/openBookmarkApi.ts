@@ -9,6 +9,8 @@ import type {
   BookmarkListResponse,
   CreateBookmarkResponse,
   RefreshBookmarkResponse,
+  BookmarkListSummary,
+  ListsResponse,
   TagWithCount,
   TagsResponse,
 } from "./types";
@@ -171,4 +173,49 @@ export async function listTags(
 
   const data = (await response.json()) as TagsResponse;
   return data.tags;
+}
+
+export async function listLists(
+  baseUrl: string,
+  options: CreateBookmarkOptions = {},
+): Promise<BookmarkListSummary[]> {
+  const response = await apiRequest(
+    baseUrl,
+    "/api/lists",
+    { method: "GET" },
+    options,
+  );
+
+  if (!response.ok) {
+    return readApiError(response);
+  }
+
+  const data = (await response.json()) as ListsResponse;
+  return data.lists;
+}
+
+export async function addBookmarksToList(
+  baseUrl: string,
+  listId: number,
+  bookmarkIds: number[],
+  options: CreateBookmarkOptions = {},
+): Promise<void> {
+  if (bookmarkIds.length === 0) {
+    return;
+  }
+
+  const response = await apiRequest(
+    baseUrl,
+    `/api/lists/${listId}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ addBookmarkIds: bookmarkIds }),
+    },
+    options,
+  );
+
+  if (!response.ok) {
+    return readApiError(response);
+  }
 }

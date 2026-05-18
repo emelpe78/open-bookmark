@@ -58,6 +58,25 @@ export function initSchema(database: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_bookmarks_normalized_url ON bookmarks(normalized_url);
     CREATE INDEX IF NOT EXISTS idx_bookmarks_created_at ON bookmarks(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);
+
+    CREATE TABLE IF NOT EXISTS lists (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS list_bookmarks (
+      list_id INTEGER NOT NULL,
+      bookmark_id INTEGER NOT NULL,
+      position INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (list_id, bookmark_id),
+      FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE,
+      FOREIGN KEY (bookmark_id) REFERENCES bookmarks(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_lists_name ON lists(name);
+    CREATE INDEX IF NOT EXISTS idx_list_bookmarks_list ON list_bookmarks(list_id, position);
   `);
 }
 

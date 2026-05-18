@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { BookmarkService } from "../../server/domain/bookmarkService";
 import { BookmarkRepository } from "../../server/repositories/bookmarkRepository";
+import { ListRepository } from "../../server/repositories/listRepository";
 import { TagRepository } from "../../server/repositories/tagRepository";
 import { createMemoryDatabase } from "../../server/utils/createMemoryDatabase";
 import { BookmarkDomainError } from "../../shared/errors/bookmarkErrors";
@@ -11,6 +12,7 @@ describe("BookmarkService", () => {
     const service = new BookmarkService({
       bookmarkRepo: new BookmarkRepository(db),
       tagRepo: new TagRepository(db),
+      listRepo: new ListRepository(db),
       resolveMetadata: vi.fn().mockResolvedValue({
         title: "T",
         description: null,
@@ -35,6 +37,7 @@ describe("BookmarkService", () => {
     const service = new BookmarkService({
       bookmarkRepo: new BookmarkRepository(db),
       tagRepo: new TagRepository(db),
+      listRepo: new ListRepository(db),
       resolveMetadata,
     });
 
@@ -50,6 +53,7 @@ describe("BookmarkService", () => {
     const service = new BookmarkService({
       bookmarkRepo: new BookmarkRepository(db),
       tagRepo: new TagRepository(db),
+      listRepo: new ListRepository(db),
       resolveMetadata: vi.fn().mockResolvedValue({
         title: "T",
         description: null,

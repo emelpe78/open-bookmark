@@ -30,7 +30,7 @@ const {
   isSelected,
   toggleId,
   setIdSelection,
-} = useBookmarkBulkRemove();
+} = useBookmarkBulkSelection();
 
 const deleteOpen = ref(false);
 const refreshing = ref(false);
@@ -130,10 +130,22 @@ function confirmDelete() {
         {{ bookmark.description }}
       </p>
 
+      <div v-if="bookmark.lists.length" class="flex flex-wrap gap-1">
+        <UBadge
+          v-for="listName in bookmark.lists"
+          :key="`list-${listName}`"
+          :label="listName"
+          icon="i-lucide-list"
+          color="info"
+          variant="outline"
+          size="xs"
+        />
+      </div>
+
       <div v-if="bookmark.tags.length" class="flex flex-wrap gap-1">
         <UBadge
           v-for="tagName in bookmark.tags"
-          :key="tagName"
+          :key="`tag-${tagName}`"
           :label="tagName"
           color="primary"
           variant="subtle"
