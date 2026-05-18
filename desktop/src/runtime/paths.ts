@@ -1,7 +1,8 @@
 import { app } from "electron";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadPreferences } from "../preferences.js";
 import { APP_PORT } from "./constants.js";
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
@@ -19,8 +20,19 @@ function repoRootFromDesktop(): string {
   return path.resolve(moduleDir, "../../..");
 }
 
-export function getDatabasePath(): string {
+export function getDefaultDatabasePath(): string {
   return path.join(app.getPath("userData"), "bookmarks.db");
+}
+
+export function getDatabasePath(): string {
+  const preferences = loadPreferences();
+  return preferences.databasePath ?? getDefaultDatabasePath();
+}
+
+/** Ensures the parent directory exists before Nitro opens the SQLite file. */
+export function ensureDatabaseDirectory(): void {
+  const databasePath = getDatabasePath();
+  mkdirSync(path.dirname(databasePath), { recursive: true });
 }
 
 export function resolveRuntimePaths(): RuntimePaths {
@@ -66,6 +78,7 @@ export function buildRuntimeEnv(paths: RuntimePaths): NodeJS.ProcessEnv {
     PORT: String(APP_PORT),
     APP_PORT: String(APP_PORT),
     DATABASE_PATH: paths.databasePath,
+    NUXT_DATABASE_PATH: paths.databasePath,
     OPEN_BOOKMARK_DESKTOP: "1",
   };
 }

@@ -12,7 +12,11 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    databasePath: process.env.DATABASE_PATH || "./data/bookmarks.db",
+    databasePath:
+      process.env.DATABASE_PATH
+      || (process.env.OPEN_BOOKMARK_DESKTOP === "1"
+        ? ""
+        : "./data/bookmarks.db"),
     public: {
       appPort: process.env.APP_PORT || "3777",
       isDesktop: process.env.OPEN_BOOKMARK_DESKTOP === "1",

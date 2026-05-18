@@ -1,13 +1,48 @@
 import Database from "better-sqlite3";
+import {
+  isDesktopRuntimeEnv,
+  WEB_DEV_DATABASE_PATH,
+} from "#shared/constants/database";
 import { mkdirSync } from "node:fs";
 import { dirname, isAbsolute, resolve } from "node:path";
 
 let db: Database.Database | null = null;
 
-function getDatabasePath(): string {
-  const config = useRuntimeConfig();
-  const configured = config.databasePath;
+function resolvePathFromConfigured(configured: string): string {
   return isAbsolute(configured) ? configured : resolve(process.cwd(), configured);
+}
+
+function databasePathFromEnv(): string | undefined {
+  return process.env.DATABASE_PATH ?? process.env.NUXT_DATABASE_PATH;
+}
+
+/**
+ * Desktop: only DATABASE_PATH from Electron (Application Support or preferences).
+ * Web dev: DATABASE_PATH / .env, else ./data/bookmarks.db — never Application Support.
+ */
+export function resolveConfiguredDatabasePath(): string {
+  if (isDesktopRuntimeEnv()) {
+    const configured = databasePathFromEnv();
+    if (!configured) {
+      throw new Error(
+        "Desktop-Laufzeit ohne DATABASE_PATH. Bitte die Desktop-App neu starten.",
+      );
+    }
+    return resolvePathFromConfigured(configured);
+  }
+
+  const fromEnv = process.env.DATABASE_PATH;
+  if (fromEnv) {
+    return resolvePathFromConfigured(fromEnv);
+  }
+
+  const config = useRuntimeConfig();
+  const configured = config.databasePath || WEB_DEV_DATABASE_PATH;
+  return resolvePathFromConfigured(configured);
+}
+
+export function isDesktopDatabaseRuntime(): boolean {
+  return isDesktopRuntimeEnv();
 }
 
 export function getDb(): Database.Database {
@@ -15,7 +50,7 @@ export function getDb(): Database.Database {
     return db;
   }
 
-  const path = getDatabasePath();
+  const path = resolveConfiguredDatabasePath();
   mkdirSync(dirname(path), { recursive: true });
 
   db = new Database(path);

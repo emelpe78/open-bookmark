@@ -1,19 +1,34 @@
 import {
   app,
   BrowserWindow,
+  dialog,
   ipcMain,
   shell,
 } from "electron";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import {
+  planDatabaseRelocation,
+  relocateDatabaseFiles,
+} from "./database/relocateDatabase.js";
+import { savePreferences } from "./preferences.js";
 import { fileURLToPath } from "node:url";
-import { APP_DISPLAY_NAME, configureAppBranding } from "./appMetadata.js";
+import {
+  APP_DISPLAY_NAME,
+  applyDarwinDisplayName,
+  configureAppBranding,
+} from "./appMetadata.js";
 import { configureDockIcon, loadAppIcon } from "./appIcon.js";
 import { buildApplicationMenu } from "./menu.js";
 import { BASE_URL } from "./runtime/constants.js";
-import { resolveRuntimePaths } from "./runtime/paths.js";
+import {
+  ensureDatabaseDirectory,
+  resolveRuntimePaths,
+} from "./runtime/paths.js";
+import { runDatabaseImport } from "./runtime/runDatabaseImport.js";
 import {
   getRuntimePaths,
+  restartRuntime,
   startRuntime,
   stopRuntime,
 } from "./runtime/startRuntime.js";
@@ -25,7 +40,7 @@ configureAppBranding();
 let mainWindow: BrowserWindow | null = null;
 
 function preloadPath(): string {
-  return path.join(moduleDir, "preload.js");
+  return path.join(moduleDir, "preload.cjs");
 }
 
 function errorPageUrl(message: string): string {
@@ -46,7 +61,7 @@ async function createMainWindow(): Promise<void> {
     webPreferences: {
       preload: preloadPath(),
       contextIsolation: true,
-      sandbox: true,
+      sandbox: false,
     },
   });
 
@@ -121,12 +136,121 @@ function registerIpcHandlers(): void {
       throw new Error(error);
     }
   });
+
+  ipcMain.handle("desktop:pickDatabaseDirectory", async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openDirectory", "createDirectory"],
+      title: "Ordner für die Datenbank wählen",
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return null;
+    }
+
+    return result.filePaths[0] ?? null;
+  });
+
+  ipcMain.handle(
+    "desktop:relocateDatabase",
+    async (_event, targetDirectory: string) => {
+      if (typeof targetDirectory !== "string" || !targetDirectory.trim()) {
+        throw new Error("Ungültiger Ordner.");
+      }
+
+      const paths = getRuntimePaths() ?? resolveRuntimePaths();
+      const plan = planDatabaseRelocation(
+        paths.databasePath,
+        targetDirectory,
+      );
+
+      await stopRuntime();
+      relocateDatabaseFiles(paths.databasePath, plan);
+      savePreferences({ databasePath: plan.targetPath });
+      const newPaths = await restartRuntime();
+
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.reload();
+      }
+
+      return {
+        databasePath: newPaths.databasePath,
+        mode: plan.mode,
+      };
+    },
+  );
+
+  ipcMain.handle(
+    "desktop:saveBackupFile",
+    async (_event, defaultName: string, bytes: Uint8Array) => {
+      if (typeof defaultName !== "string" || !defaultName.trim()) {
+        throw new Error("Ungültiger Dateiname.");
+      }
+      if (!(bytes instanceof Uint8Array)) {
+        throw new Error("Ungültige Backup-Daten.");
+      }
+
+      const result = await dialog.showSaveDialog({
+        defaultPath: defaultName,
+        filters: [{ name: "SQL", extensions: ["sql"] }],
+        title: "Backup speichern",
+      });
+
+      if (result.canceled || !result.filePath) {
+        return { saved: false as const };
+      }
+
+      writeFileSync(result.filePath, Buffer.from(bytes));
+      return { saved: true as const, filePath: result.filePath };
+    },
+  );
+
+  ipcMain.handle("desktop:importDatabase", async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openFile"],
+      filters: [{ name: "SQL", extensions: ["sql"] }],
+      title: "SQL-Backup importieren",
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { imported: false as const };
+    }
+
+    const filePath = result.filePaths[0];
+    if (!filePath) {
+      return { imported: false as const };
+    }
+
+    const paths = getRuntimePaths() ?? resolveRuntimePaths();
+
+    await stopRuntime();
+    try {
+      await runDatabaseImport(paths, filePath);
+    } catch (error: unknown) {
+      await restartRuntime();
+      const message =
+        error instanceof Error ? error.message : "SQL-Import fehlgeschlagen.";
+      throw new Error(message);
+    }
+
+    const newPaths = await restartRuntime();
+
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.reload();
+    }
+
+    return {
+      imported: true as const,
+      databasePath: newPaths.databasePath,
+      sourcePath: filePath,
+    };
+  });
 }
 
 async function bootstrap(): Promise<void> {
   registerIpcHandlers();
 
   try {
+    ensureDatabaseDirectory();
     await startRuntime();
     await createMainWindow();
   } catch (error) {
@@ -137,6 +261,7 @@ async function bootstrap(): Promise<void> {
 }
 
 app.whenReady().then(() => {
+  applyDarwinDisplayName();
   setImmediate(() => configureDockIcon());
   void bootstrap();
 
@@ -149,7 +274,7 @@ app.whenReady().then(() => {
 });
 
 app.on("before-quit", () => {
-  stopRuntime();
+  void stopRuntime();
 });
 
 app.on("window-all-closed", () => {

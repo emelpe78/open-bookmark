@@ -61,22 +61,35 @@ export async function startRuntime(): Promise<RuntimePaths> {
   return paths;
 }
 
-export function stopRuntime(): void {
+export function stopRuntime(): Promise<void> {
   if (!runtimeProcess) {
-    return;
+    runtimePaths = null;
+    return Promise.resolve();
   }
 
   const child = runtimeProcess;
   runtimeProcess = null;
-  child.kill("SIGTERM");
+  runtimePaths = null;
 
-  const forceKill = setTimeout(() => {
-    if (!child.killed) {
-      child.kill("SIGKILL");
-    }
-  }, 5_000);
+  return new Promise((resolve) => {
+    const forceKill = setTimeout(() => {
+      if (!child.killed) {
+        child.kill("SIGKILL");
+      }
+    }, 5_000);
 
-  child.once("exit", () => clearTimeout(forceKill));
+    child.once("exit", () => {
+      clearTimeout(forceKill);
+      resolve();
+    });
+
+    child.kill("SIGTERM");
+  });
+}
+
+export async function restartRuntime(): Promise<RuntimePaths> {
+  await stopRuntime();
+  return startRuntime();
 }
 
 export function getRuntimePaths(): RuntimePaths | null {

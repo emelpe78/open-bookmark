@@ -1,11 +1,11 @@
 # AGENTS.md
 
-Leitfaden für AI-Agents am Projekt **Open Bookmark** — lokaler Bookmark-Manager (Nuxt 4, SQLite, **Electron Desktop macOS**) plus **Chrome Extension** (Manifest V3). Details: [`README.md`](README.md), Desktop: [`desktop/README.md`](desktop/README.md), Extension: [`extension/README.md`](extension/README.md).
+Leitfaden für AI-Agents am Projekt **Open Bookmark** — lokaler Bookmark-Manager (Nuxt 4, SQLite, **Electron Desktop macOS**) plus **Chrome Extension** (Manifest V3). Details: [`README.md`](README.md), Domäne: [`CONTEXT.md`](CONTEXT.md), Desktop: [`desktop/README.md`](desktop/README.md), Extension: [`extension/README.md`](extension/README.md).
 
 ## Produkt (MVP)
 
 - **local-first**, Single-User, **ohne Auth**, **ohne LLM**
-- URLs speichern, Metadaten per Server-Fetch (Cheerio), Karten-UI, Suche, Tags, Markdown-Notizen
+- URLs speichern (einzeln + Bulk), Metadaten per Server-Fetch (Cheerio), Karten-UI, Suche/Filter, Tags, **Listen**, Markdown-Notizen
 - **macOS Desktop-App:** Electron startet Nitro auf `127.0.0.1:3777`, SQLite unter Application Support
 - **Chrome Extension:** Side-Load aus `extension/dist`; speichert per HTTP-API (kein Store im MVP)
 - Open Source — keine Secrets, keine `.db`-Dateien committen
@@ -19,38 +19,41 @@ Leitfaden für AI-Agents am Projekt **Open Bookmark** — lokaler Bookmark-Manag
 | `open-bookmark/` | Nuxt-4-App (Quellcode, API, SQLite) |
 | `extension/` | Chrome Extension (MV3, Vite, TypeScript) |
 | `desktop/` | Electron Main/Preload, Packaging |
-| `docs/` | PRD, ADRs |
 
 ## Stack & Layout (Web-App)
 
 | Bereich | Pfad (`open-bookmark/`) |
 |---------|-------------------------|
 | UI | `app/pages/`, `app/components/`, `app/layouts/` |
-| Composables | `app/composables/useBookmarks.ts`, `useBookmarkModals.ts`, `useBookmarkForm.ts`, `useDesktopBridge.ts` |
+| Composables | `app/composables/` — u. a. `useBookmarks`, `useBookmarkModals`, `useBookmarkForm`, `useDesktopBridge`, `useListAdmin`, `useTagAdmin`, `useBookmarkListAutoSync` |
 | Shared | `shared/constants/`, `shared/lib/`, `shared/errors/`, `shared/types/` |
 | Domain | `server/domain/bookmarkService.ts`, `createBookmarkService.ts` |
-| Repositories | `server/repositories/bookmarkRepository.ts`, `tagRepository.ts` |
-| API | `server/api/bookmarks/`, `server/api/tags/` |
+| Repositories | `server/repositories/bookmarkRepository.ts`, `tagRepository.ts`, `listRepository.ts` |
+| API | `server/api/bookmarks/`, `server/api/tags/`, `server/api/lists/` |
 | HTTP-Adapter | `server/utils/http/mapBookmarkError.ts`, `parseRouteParams.ts` |
 | Metadaten | `server/utils/metadata.ts` (`extractMetadataFromHtml`, `fetchPageHtml`) |
 | Markdown | `lib/markdown.ts` |
-| Extension-Onboarding | `app/pages/extension.vue`, `app/components/OnboardingModal.vue` |
+| Einstellungen / Extension | `app/pages/settings.vue` (`SettingsDatabaseSection`, `useDatabaseSettings`), `extension.vue`, `OnboardingModal.vue` |
 
 ## Desktop (`desktop/`)
 
 | Bereich | Pfad |
 |---------|------|
 | Main | `src/main.ts` |
-| Preload | `src/preload.ts` → `window.openBookmarkDesktop` |
+| Preload | `src/preload.cjs` (CommonJS) → `window.openBookmarkDesktop` |
+| DB-Pfad / Prefs | `src/preferences.ts`, `src/database/relocateDatabase.ts`, `src/runtime/paths.ts` |
+| Branding | `src/appMetadata.ts`; Dev-Dock: `Open Bookmark.app` via `scripts/patch-electron-mac.sh` + `scripts/run-dev.sh` |
 | Runtime-Start | `src/runtime/startRuntime.ts` (Child: `node .output/server/index.mjs`) |
 | Packaging | `package.json` → `electron-builder`, `scripts/build-runtime.sh` |
 
 **Desktop-Regeln**
 
 - Keine Fachlogik in Electron — nur Shell, Spawn, IPC, Packaging.
-- `HOST=127.0.0.1`, Port **3777** fix (MVP); bei `EADDRINUSE` Fehler-UI.
-- `DATABASE_PATH` = `app.getPath('userData')/bookmarks.db`, `app.setName('Open Bookmark')`.
-- Renderer: `contextIsolation` + `sandbox`, kein `nodeIntegration`.
+- `HOST=127.0.0.1`, Port **3777** fix (MVP); bei `EADDRINUSE` / laufendem `npm run dev` Fehler-UI.
+- **Eine produktive DB:** Standard `~/Library/Application Support/Open Bookmark/bookmarks.db`; optional anderer Pfad in `preferences.json` (Einstellungen → Pfad ändern). Web-Dev nutzt **nur** `./data/bookmarks.db` — nie dieselbe Datei wie Desktop.
+- Child-Env: `DATABASE_PATH`, `NUXT_DATABASE_PATH`, `OPEN_BOOKMARK_DESKTOP=1`. Pfad-Auflösung: `server/utils/db.ts` (`resolveConfiguredDatabasePath`).
+- Dev: `npm run dev` in `desktop/` (nicht `electron .`); Port 3777 nicht mit `open-bookmark` Dev teilen.
+- Renderer: `contextIsolation`, Preload **ohne** `nodeIntegration`; `sandbox: false` (Preload-Kompatibilität).
 
 ## Chrome Extension (`extension/`)
 
@@ -78,28 +81,40 @@ cd extension && npm run test && npm run typecheck
 
 **Wichtig:** Domain wirft **keine** `createError`-HTTP-Fehler — nur `BookmarkDomainError`. HTTP-Mapping in `server/utils/http/`.
 
-**Env:** `APP_PORT=3777`, `DATABASE_PATH` (Dev: `./data/bookmarks.db`; Desktop setzt Application Support).
+**Env:** `APP_PORT=3777`, `DATABASE_PATH` (Web-Dev: `./data/bookmarks.db` in `.env`; Desktop setzt absoluten Pfad). `runtimeConfig.public.isDesktop` ist im Client-Build oft `false` — Desktop-Erkennung: API `isDesktop`, Preload `isDesktopShell`, `window.__OPEN_BOOKMARK_DESKTOP__` (Nitro-Plugin `server/plugins/desktop-public-config.ts`).
 
 ## UI-Regeln
 
 - **Nuxt UI** — Theming `app/app.config.ts`
 - Formulare: `BookmarkFormFields` + `useBookmarkForm`; Fehler: `extractFetchError`
 - Add: `BookmarkAddModal` | Edit: `BookmarkEditModal`
+- Tags/Listen administrieren: `app/pages/settings.vue`
 
 ## Datenbank
 
-Tabellen: `bookmarks`, `tags`, `bookmark_tags`. Duplikate über `normalized_url`. Leere Notizen als `null`.
+Tabellen: `bookmarks`, `tags`, `bookmark_tags`, `lists`, `list_bookmarks`. Duplikate über `normalized_url`. Leere Notizen als `null`.
+
+**Admin-API:** `GET /api/database`, `GET /api/database/backup` (SQL-Dump), `POST /api/database/import` (überschreibt DB). Utils: `databaseInfo.ts`, `databaseDump.ts`, `databaseImport.ts`; CLI `open-bookmark/scripts/import-database.mjs`. Desktop-Import: IPC `desktop:importDatabase` (Runtime stoppen → Child-`node` mit Nitro-Node-Binary → Neustart; **nicht** `better-sqlite3` im Electron-Prozess).
 
 ## API
 
+Vollständige Spezifikation: [`README.md` § API](README.md#api). Kurzüberblick:
+
 | Methode | Pfad | Extension |
 |---------|------|-----------|
-| GET | `/api/bookmarks` | Duplikat/Update |
-| POST | `/api/bookmarks` | Speichern |
+| GET | `/api/bookmarks` | Duplikat-Suche, Listen |
+| GET | `/api/bookmarks/revision` | — (Web: Auto-Sync) |
+| POST | `/api/bookmarks` | Speichern (einzeln) |
 | PATCH | `/api/bookmarks/:id` | Tags/Notizen |
 | DELETE | `/api/bookmarks/:id` | — |
-| GET | `/api/tags` | Vorschläge, Health |
 | POST | `/api/bookmarks/:id/refresh` | Metadaten neu laden |
+| GET | `/api/tags` | Vorschläge, Health |
+| POST/PATCH/DELETE | `/api/tags`, `/api/tags/:id` | — |
+| GET/POST | `/api/lists` | Listen laden |
+| GET/PATCH/DELETE | `/api/lists/:id` | Bookmarks zu Liste (`PATCH` `addBookmarkIds`) |
+| GET | `/api/database`, `/api/database/backup` | — (Desktop-UI Einstellungen) |
+
+Query bei `GET /api/bookmarks`: `search`, `page`, `pageSize`, `tag`, `list`.
 
 ## Entwicklung
 
@@ -110,11 +125,11 @@ cd open-bookmark && npm install && npm run dev
 npm run typecheck && npm run test
 ```
 
-**Desktop**
+**Desktop** (vorher `open-bookmark` Dev auf 3777 beenden)
 
 ```bash
 cd open-bookmark && npm run build
-cd desktop && npm install && npm run dev
+cd desktop && npm install && npm run dev   # startet Open Bookmark.app
 cd desktop && npm run build:runtime && npm run pack:dir
 ```
 

@@ -11,11 +11,13 @@ cd ../open-bookmark && npm run build
 # 2. Extension-Build (für Ordner „extension/dist“ in der UI)
 cd ../extension && npm run build
 
-# 3. Electron
+# 3. Electron (startet „Open Bookmark.app“, nicht „Electron“ im Dock)
 cd ../desktop
 npm install
 npm run dev
 ```
+
+`npm run dev` legt bei Bedarf `node_modules/electron/dist/Open Bookmark.app` an und startet diese Kopie — so heißt die App im Dock **Open Bookmark**. Nicht `electron .` manuell aufrufen.
 
 ## Production-Build
 
@@ -50,7 +52,8 @@ npm run icons   # → resources/icon.png, resources/icon.icns
 | Main | `src/main.ts` — Fenster, IPC, Lifecycle |
 | Preload | `src/preload.ts` — `window.openBookmarkDesktop` |
 | Runtime | `../open-bookmark/.output/server/index.mjs` |
-| Datenbank | `~/Library/Application Support/Open Bookmark/bookmarks.db` |
+| Datenbank (Standard) | `~/Library/Application Support/Open Bookmark/bookmarks.db` |
+| Datenbank (optional) | Anderer Pfad über Einstellungen → Allgemein → Datenbank; gespeichert in `preferences.json` im App-Datenordner |
 | Extension (Side-Load) | `../extension/dist` (Dev) bzw. `Resources/extension-dist` (Packaged) |
 | Logs | `~/Library/Application Support/Open Bookmark/logs/runtime.log` |
 
@@ -67,8 +70,16 @@ npm run icons   # → resources/icon.png, resources/icon.icns
 
 Für Verteilung außerhalb des Teams: Apple Developer ID, `CSC_LINK` / `APPLE_ID` für `electron-builder` Notarisierung. Ohne Zertifikat: lokaler Test mit `pack:dir` und Gatekeeper-Ausnahme.
 
+## Datenbank & Backup
+
+- **Eine produktive Datenbank:** Die Desktop-App nutzt ausschließlich `~/Library/Application Support/Open Bookmark/bookmarks.db` (oder einen per Einstellungen gewählten Pfad in `preferences.json`). `npm run dev` im Ordner `open-bookmark/` verwendet **immer** `./data/bookmarks.db` — getrennt von der Desktop-DB.
+- **Nicht gleichzeitig:** `npm run dev` und die Desktop-App dürfen Port 3777 nicht teilen. Läuft der Dev-Server, schlägt der Desktop-Start mit einer klaren Meldung fehl.
+- **Speicherort ändern:** Nur in der Desktop-App (Einstellungen → Allgemein → „Pfad ändern“). Ordnerdialog, Kopie inkl. WAL/SHM, Nitro-Neustart, Pfad in `preferences.json`.
+- **Backup:** SQL-Datei über `GET /api/database/backup`. Restore in der UI nicht enthalten.
+- **Rollback:** `preferences.json` im App-Datenordner anpassen oder löschen.
+
 ## Fehlerbehebung
 
-- **Port 3777 belegt:** anderen Dev-Server oder zweite Instanz beenden.
+- **Port 3777 belegt:** `npm run dev` in `open-bookmark/` beenden, dann Desktop neu starten (Dev und Desktop teilen sich nicht dieselbe DB).
 - **Nitro-Build fehlt:** `cd open-bookmark && npm run build`.
 - **Runtime-Log:** Application Support → Open Bookmark → `logs/runtime.log`.

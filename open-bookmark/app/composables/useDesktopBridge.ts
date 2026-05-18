@@ -4,15 +4,47 @@ export type OpenExtensionFolderResult =
   | { ok: true }
   | { ok: false; message: string };
 
-export function useDesktopBridge() {
-  const api = import.meta.client
-    ? (window.openBookmarkDesktop as OpenBookmarkDesktopApi | undefined)
-    : undefined;
+declare global {
+  interface Window {
+    __OPEN_BOOKMARK_DESKTOP__?: boolean;
+  }
+}
 
-  const isElectron = computed(() => Boolean(api));
+function readDesktopApi(): OpenBookmarkDesktopApi | undefined {
+  if (!import.meta.client) {
+    return undefined;
+  }
+  return window.openBookmarkDesktop;
+}
+
+function isDesktopShellClient(): boolean {
+  if (!import.meta.client) {
+    return false;
+  }
+  return (
+    window.__OPEN_BOOKMARK_DESKTOP__ === true
+    || window.openBookmarkDesktop?.isDesktopShell === true
+  );
+}
+
+export function useDesktopBridge() {
+  const runtimeConfig = useRuntimeConfig();
+
+  const api = computed(() => readDesktopApi());
+
+  const isElectron = computed(() => {
+    const desktop = api.value;
+    return (
+      isDesktopShellClient()
+      || Boolean(desktop?.isDesktopShell)
+      || Boolean(desktop)
+      || runtimeConfig.public.isDesktop === true
+    );
+  });
 
   async function openExtensionFolder(): Promise<OpenExtensionFolderResult> {
-    if (!api) {
+    const desktop = api.value;
+    if (!desktop) {
       return {
         ok: false,
         message: "Ordner öffnen ist nur in der Desktop-App verfügbar.",
@@ -20,7 +52,7 @@ export function useDesktopBridge() {
     }
 
     try {
-      await api.openExtensionFolder();
+      await desktop.openExtensionFolder();
       return { ok: true };
     } catch (error: unknown) {
       const message =
@@ -32,8 +64,9 @@ export function useDesktopBridge() {
   }
 
   async function openChromeExtensions(): Promise<void> {
-    if (api) {
-      await api.openExternal("chrome://extensions");
+    const desktop = api.value;
+    if (desktop) {
+      await desktop.openExternal("chrome://extensions");
       return;
     }
     if (import.meta.client) {

@@ -25,6 +25,7 @@ export function configureAppBranding(): void {
   const meta = loadAppMetadata();
 
   if (process.platform === "darwin") {
+    // Menu bar, About, and Dock tooltip in dev (with patched Electron.app Info.plist).
     app.setName(meta.name);
   }
 
@@ -37,4 +38,11 @@ export function configureAppBranding(): void {
     copyright: `Copyright © ${new Date().getFullYear()} Marc Lettau-Poelchen`,
     ...(aboutIconPath ? { iconPath: aboutIconPath } : {}),
   });
+}
+
+/** Re-apply after `app.whenReady()` so macOS picks up the display name. */
+export function applyDarwinDisplayName(): void {
+  if (process.platform === "darwin") {
+    app.setName(APP_DISPLAY_NAME);
+  }
 }

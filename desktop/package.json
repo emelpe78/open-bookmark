@@ -1,14 +1,14 @@
 {
   "name": "open-bookmark-desktop",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Open Bookmark — native macOS shell (Electron)",
   "type": "module",
   "main": "dist/main.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "npm run icons && npm run build && electron .",
-    "start": "electron .",
+    "build": "tsc && cp src/preload.cjs dist/preload.cjs",
+    "dev": "npm run icons && bash scripts/patch-electron-mac.sh && npm run build && bash scripts/run-dev.sh",
+    "start": "bash scripts/run-dev.sh",
     "typecheck": "tsc --noEmit",
     "icons": "bash scripts/generate-icons.sh",
     "prepare-node": "bash scripts/prepare-node.sh",
@@ -34,6 +34,7 @@
     },
     "files": [
       "dist/**/*",
+      "src/preload.cjs",
       "src/error.html",
       "package.json",
       "resources/icon.png",

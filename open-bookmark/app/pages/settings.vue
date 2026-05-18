@@ -28,6 +28,7 @@ const tabItems = [
         <template #content="{ item }">
           <div v-if="item.value === 'general'" class="space-y-4 pt-4">
             <SettingsThemeField />
+            <SettingsDatabaseSection />
           </div>
           <SettingsTagsPanel v-else-if="item.value === 'tags'" class="pt-4" />
           <SettingsListsPanel v-else-if="item.value === 'lists'" class="pt-4" />
