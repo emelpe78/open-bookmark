@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Extension-Installation:** Anleitung zum Laden der Release-ZIP von [GitHub Releases](https://github.com/emelpe78/open-bookmark/releases) (App `/extension`, Onboarding, README); Shortcuts „Releases öffnen“ und „Chrome-Erweiterungen öffnen“.
-- **Release-Dokumentation:** `docs/GitHub_Release.md` (Tag setzen, Gatekeeper-Hinweis nach Download).
 - **CODEOWNERS:** `.github/CODEOWNERS` für Review-Pflicht auf `main`.
 - **Paket-Metadaten:** `description`, `author`, `license`, `repository`, `bugs`, `keywords` und `engines` in `open-bookmark/`, `extension/` und `desktop/package.json`.
 

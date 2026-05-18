@@ -52,6 +52,7 @@
   "build": {
     "appId": "app.openbookmark.desktop",
     "productName": "Open Bookmark",
+    "publish": null,
     "directories": {
       "buildResources": "resources",
       "output": "release"
