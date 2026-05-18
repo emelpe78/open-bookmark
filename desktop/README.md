@@ -29,7 +29,7 @@ npm run pack:dir        # nur .app (schneller zum Testen)
 
 ## App-Icon
 
-Quelle: [`../docs/favicon.png`](../docs/favicon.png). Erzeugen:
+Quelle: lokal [`../docs/favicon.png`](../docs/favicon.png) (gitignored) oder die committed `resources/icon.png`. Erzeugen:
 
 ```bash
 npm run icons   # → resources/icon.png, resources/icon.icns

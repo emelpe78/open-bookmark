@@ -7,21 +7,44 @@ import sharp from "sharp";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const desktopRoot = path.resolve(scriptDir, "..");
 const repoRoot = path.resolve(desktopRoot, "..");
-const source = process.argv[2] ?? path.join(repoRoot, "docs/favicon.png");
 const resources = path.join(desktopRoot, "resources");
 const masterPng = path.join(resources, "icon.png");
 const iconset = path.join(resources, "icon.iconset");
 const icnsOut = path.join(resources, "icon.icns");
 
-if (!existsSync(source)) {
-  console.error(`Icon source not found: ${source}`);
+const sourceCandidates = [
+  process.argv[2],
+  path.join(repoRoot, "docs/favicon.png"),
+  path.join(resources, "icon.png"),
+].filter((candidate) => candidate && existsSync(candidate));
+
+let source;
+for (const candidate of sourceCandidates) {
+  try {
+    await sharp(candidate).metadata();
+    source = candidate;
+    break;
+  }
+  catch {
+    // skip unreadable paths (e.g. corrupt or unsupported formats)
+  }
+}
+
+if (!source) {
+  if (existsSync(masterPng) && existsSync(icnsOut)) {
+    console.log(`Using committed icons (${masterPng}, ${icnsOut}); no source image found.`);
+    process.exit(0);
+  }
+  console.error(
+    "No usable icon source found. Add docs/favicon.png locally or commit desktop/resources/icon.png.",
+  );
   process.exit(1);
 }
 
 mkdirSync(resources, { recursive: true });
 
 /**
- * Build 1024×1024 master from docs/favicon.png.
+ * Build 1024×1024 master from docs/favicon.png (local) or existing resources/icon.png.
  * Black background → alpha so the dock squircle mask shows rounded corners.
  */
 async function buildMasterPng() {
