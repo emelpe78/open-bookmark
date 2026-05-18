@@ -115,6 +115,16 @@ export function useBookmarks() {
     await Promise.all([refresh(), refreshTags()]);
   }
 
+  async function deleteBookmarks(ids: number[]): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+    await Promise.all(
+      ids.map((id) => $fetch(`/api/bookmarks/${id}`, { method: "DELETE" })),
+    );
+    await Promise.all([refresh(), refreshTags()]);
+  }
+
   async function refreshBookmarkMetadata(id: number): Promise<Bookmark> {
     const result = await $fetch<{ bookmark: Bookmark }>(`/api/bookmarks/${id}/refresh`, {
       method: "POST",
@@ -143,6 +153,7 @@ export function useBookmarks() {
     bulkImport,
     updateBookmark,
     deleteBookmark,
+    deleteBookmarks,
     refreshBookmarkMetadata,
   };
 }

@@ -25,8 +25,28 @@ const displayHost = computed(() => {
   }
 });
 
+const {
+  active: bulkActive,
+  isSelected,
+  toggleId,
+  setIdSelection,
+} = useBookmarkBulkRemove();
+
 const deleteOpen = ref(false);
 const refreshing = ref(false);
+
+const selected = computed(() => isSelected(props.bookmark.id));
+
+function onCardClick(event: MouseEvent): void {
+  if (!bulkActive.value) {
+    return;
+  }
+  const target = event.target as HTMLElement;
+  if (target.closest("a, button, input, label")) {
+    return;
+  }
+  toggleId(props.bookmark.id);
+}
 
 async function onRefresh() {
   refreshing.value = true;
@@ -49,9 +69,27 @@ function confirmDelete() {
 </script>
 
 <template>
-  <UCard class="flex h-full flex-col overflow-hidden">
+  <UCard
+    class="flex h-full flex-col overflow-hidden transition-shadow"
+    :class="[
+      bulkActive && 'cursor-pointer',
+      bulkActive && selected && 'ring-2 ring-primary',
+    ]"
+    @click="onCardClick"
+  >
     <template #header>
-      <div class="aspect-video w-full overflow-hidden rounded-md bg-muted">
+      <div class="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+        <UCheckbox
+          v-if="bulkActive"
+          :model-value="selected"
+          class="absolute top-2 right-2 z-10"
+          :ui="{ base: 'bg-elevated/90 backdrop-blur' }"
+          :aria-label="`Lesezeichen ${displayTitle} auswählen`"
+          @click.stop
+          @update:model-value="
+            (value) => setIdSelection(bookmark.id, value === true)
+          "
+        />
         <img
           v-if="bookmark.image_url"
           :src="bookmark.image_url"
@@ -112,7 +150,7 @@ function confirmDelete() {
       />
     </div>
 
-    <template #footer>
+    <template v-if="!bulkActive" #footer>
       <div class="flex flex-wrap gap-2">
         <UButton
           label="Bearbeiten"
