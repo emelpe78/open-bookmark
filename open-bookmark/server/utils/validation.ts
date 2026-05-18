@@ -52,6 +52,10 @@ export const listBodySchema = z.object({
   bookmarkIds: z.array(z.coerce.number().int().positive()).optional().default([]),
 });
 
+export const importBookmarkHtmlBodySchema = z.object({
+  html: z.string().min(1, "HTML darf nicht leer sein."),
+});
+
 export const listPatchBodySchema = z
   .object({
     name: z.string().trim().min(1, "Listenname ist erforderlich.").optional(),

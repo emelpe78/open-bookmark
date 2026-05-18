@@ -67,4 +67,26 @@ describe("BookmarkService", () => {
 
     expect(result).toBe("skipped");
   });
+
+  it("importFromHtml imports unique links and skips duplicates", async () => {
+    const db = createMemoryDatabase();
+    const service = new BookmarkService({
+      bookmarkRepo: new BookmarkRepository(db),
+      tagRepo: new TagRepository(db),
+      listRepo: new ListRepository(db),
+      resolveMetadata: vi.fn().mockResolvedValue({
+        title: "T",
+        description: null,
+        image_url: null,
+        site_name: "example.com",
+      }),
+    });
+
+    const html = `<a href="https://one.example">One</a><a href="https://two.example">Two</a>`;
+    const result = await service.importFromHtml(html);
+
+    expect(result.created).toBe(2);
+    expect(result.skipped).toBe(0);
+    expect(result.failed).toEqual([]);
+  });
 });

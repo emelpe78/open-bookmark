@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            open-bookmark/package-lock.json
+            extension/package-lock.json
+            desktop/package-lock.json
+
+      - name: Build Nuxt runtime
+        working-directory: open-bookmark
+        run: npm ci && npm run build
+
+      - name: Build extension
+        working-directory: extension
+        run: npm ci && npm run build
+
+      - name: Pack desktop (DMG)
+        working-directory: desktop
+        run: npm ci && npm run pack
+
+      - name: Zip extension for side-load
+        run: |
+          cd extension/dist
+          zip -r "../../open-bookmark-extension-${{ github.ref_name }}.zip" .
+
+      - name: Zip macOS app
+        run: |
+          cd desktop/release/mac-arm64
+          zip -r "../../Open-Bookmark-${{ github.ref_name }}-mac-arm64.zip" "Open Bookmark.app"
+
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v version="$VERSION" '
+            /^\[/{ if ($0 ~ "^\\[" version "\\]") { found=1; next } else if (found) { exit } }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "See CHANGELOG.md for release notes." > release-notes.md
+          fi
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: false
+          body_path: release-notes.md
+          files: |
+            desktop/release/*.dmg
+            Open-Bookmark-${{ github.ref_name }}-mac-arm64.zip
+            open-bookmark-extension-${{ github.ref_name }}.zip

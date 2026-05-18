@@ -5,6 +5,7 @@ import {
 } from "#shared/constants/database";
 import { mkdirSync } from "node:fs";
 import { dirname, isAbsolute, resolve } from "node:path";
+import { runMigrations } from "./schemaMigrations";
 
 let db: Database.Database | null = null;
 
@@ -58,6 +59,7 @@ export function getDb(): Database.Database {
   db.pragma("foreign_keys = ON");
 
   initSchema(db);
+  runMigrations(db);
 
   return db;
 }

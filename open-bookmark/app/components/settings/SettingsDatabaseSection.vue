@@ -18,11 +18,18 @@ const {
   createBackup,
   importLoading,
   importModalOpen,
+  htmlImportModalOpen,
+  htmlImportSummary,
   sqlFileInput,
+  htmlFileInput,
   openImportModal,
   cancelImport,
   confirmImport,
+  openHtmlImportModal,
+  cancelHtmlImport,
+  confirmHtmlImport,
   onSqlFileSelected,
+  onHtmlFileSelected,
   formatBytes,
 } = useDatabaseSettings();
 
@@ -50,6 +57,25 @@ async function handleConfirmImport(): Promise<void> {
     description: "Alle Lesezeichen wurden aus dem SQL-Backup übernommen.",
     color: "success",
   });
+}
+
+async function handleConfirmHtmlImport(): Promise<void> {
+  await confirmHtmlImport();
+}
+
+function closeHtmlImportWithToast(): void {
+  if (!htmlImportSummary.value) {
+    return;
+  }
+
+  const { created, skipped, failed } = htmlImportSummary.value;
+  toast.add({
+    title: "HTML-Import abgeschlossen",
+    description: `${created} angelegt, ${skipped} übersprungen${failed.length ? `, ${failed.length} fehlgeschlagen` : ""}.`,
+    color: failed.length ? "warning" : "success",
+  });
+  htmlImportSummary.value = null;
+  cancelHtmlImport();
 }
 
 async function handleConfirmRelocate(): Promise<void> {
@@ -139,6 +165,14 @@ async function handleConfirmRelocate(): Promise<void> {
             @click="openImportModal"
           />
           <UButton
+            label="HTML importieren"
+            icon="i-lucide-file-input"
+            color="neutral"
+            variant="outline"
+            :loading="importLoading"
+            @click="openHtmlImportModal"
+          />
+          <UButton
             label="Aktualisieren"
             icon="i-lucide-refresh-cw"
             color="neutral"
@@ -173,6 +207,60 @@ async function handleConfirmRelocate(): Promise<void> {
     class="hidden"
     @change="onSqlFileSelected"
   >
+
+  <input
+    ref="htmlFileInput"
+    type="file"
+    accept=".html,text/html"
+    class="hidden"
+    @change="onHtmlFileSelected"
+  >
+
+  <UModal v-model:open="htmlImportModalOpen" title="Lesezeichen aus HTML importieren?">
+    <template #body>
+      <p class="text-sm text-muted">
+        Wähle eine
+        <code class="rounded bg-elevated px-1">bookmarks.html</code>
+        (Chrome: Lesezeichen verwalten → Exportieren). URLs werden importiert,
+        Duplikate übersprungen. Metadaten werden pro URL geladen — das kann bei
+        vielen Lesezeichen dauern.
+      </p>
+      <div
+        v-if="htmlImportSummary"
+        class="mt-4 flex flex-col gap-2 rounded-md border border-default p-3 text-sm"
+      >
+        <p>{{ htmlImportSummary.created }} angelegt</p>
+        <p>{{ htmlImportSummary.skipped }} übersprungen</p>
+        <p v-if="htmlImportSummary.failed.length">
+          {{ htmlImportSummary.failed.length }} fehlgeschlagen
+        </p>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <UButton
+          v-if="htmlImportSummary"
+          label="Schließen"
+          color="primary"
+          @click="closeHtmlImportWithToast"
+        />
+        <template v-else>
+          <UButton
+            label="Abbrechen"
+            color="neutral"
+            variant="ghost"
+            :disabled="importLoading"
+            @click="cancelHtmlImport"
+          />
+          <UButton
+            label="HTML-Datei wählen"
+            color="primary"
+            icon="i-lucide-file-input"
+            :loading="importLoading"
+            @click="handleConfirmHtmlImport"
+          />
+        </template>
+      </div>
+    </template>
+  </UModal>
 
   <UModal v-model:open="importModalOpen" title="SQL-Backup importieren?">
     <template #body>

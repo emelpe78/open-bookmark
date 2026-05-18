@@ -1,3 +1,4 @@
+import type { BulkImportResult } from "#shared/types/bookmark";
 import type { DatabaseInfo } from "#shared/types/database";
 import type { OpenBookmarkDesktopApi } from "~/types/desktop";
 import { extractFetchError } from "../utils/extractFetchError";
@@ -66,7 +67,10 @@ export function useDatabaseSettings() {
   const importLoading = ref(false);
   const relocateLoading = ref(false);
   const importModalOpen = ref(false);
+  const htmlImportModalOpen = ref(false);
   const sqlFileInput = ref<HTMLInputElement | null>(null);
+  const htmlFileInput = ref<HTMLInputElement | null>(null);
+  const htmlImportSummary = ref<BulkImportResult | null>(null);
 
   const relocateModalOpen = ref(false);
   const pendingRelocateDirectory = ref<string | null>(null);
@@ -177,6 +181,20 @@ export function useDatabaseSettings() {
     importModalOpen.value = false;
   }
 
+  function openHtmlImportModal(): void {
+    htmlImportSummary.value = null;
+    htmlImportModalOpen.value = true;
+  }
+
+  function cancelHtmlImport(): void {
+    htmlImportModalOpen.value = false;
+    htmlImportSummary.value = null;
+  }
+
+  function startHtmlFilePick(): void {
+    htmlFileInput.value?.click();
+  }
+
   function startSqlFilePick(): void {
     sqlFileInput.value?.click();
   }
@@ -237,6 +255,46 @@ export function useDatabaseSettings() {
     importModalOpen.value = false;
     startSqlFilePick();
     return false;
+  }
+
+  async function importHtmlContent(html: string): Promise<BulkImportResult | null> {
+    importLoading.value = true;
+    try {
+      const result = await $fetch<BulkImportResult>("/api/bookmarks/import-html", {
+        method: "POST",
+        body: { html },
+      });
+      htmlImportSummary.value = result;
+      await refresh();
+      return result;
+    } catch (caught: unknown) {
+      toast.add({
+        title: "HTML-Import fehlgeschlagen",
+        description: extractFetchError(caught),
+        color: "error",
+      });
+      return null;
+    } finally {
+      importLoading.value = false;
+    }
+  }
+
+  async function confirmHtmlImport(): Promise<boolean> {
+    htmlImportModalOpen.value = false;
+    startHtmlFilePick();
+    return false;
+  }
+
+  async function onHtmlFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    await importHtmlContent(await file.text());
   }
 
   async function onSqlFileSelected(event: Event): Promise<void> {
@@ -327,7 +385,10 @@ export function useDatabaseSettings() {
     relocateLoading,
     relocateModalOpen,
     importModalOpen,
+    htmlImportModalOpen,
+    htmlImportSummary,
     sqlFileInput,
+    htmlFileInput,
     pendingTargetPath,
     isElectron,
     canChangePath,
@@ -340,7 +401,11 @@ export function useDatabaseSettings() {
     openImportModal,
     cancelImport,
     confirmImport,
+    openHtmlImportModal,
+    cancelHtmlImport,
+    confirmHtmlImport,
     onSqlFileSelected,
+    onHtmlFileSelected,
     createBackup,
     formatBytes,
   };

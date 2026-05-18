@@ -1,7 +1,7 @@
 {
   "name": "open-bookmark-desktop",
   "private": true,
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Open Bookmark — native macOS shell (Electron)",
   "type": "module",
   "main": "dist/main.js",
@@ -10,6 +10,7 @@
     "dev": "npm run icons && bash scripts/patch-electron-mac.sh && npm run build && bash scripts/run-dev.sh",
     "start": "bash scripts/run-dev.sh",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "icons": "bash scripts/generate-icons.sh",
     "prepare-node": "bash scripts/prepare-node.sh",
     "build:runtime": "bash scripts/build-runtime.sh",
@@ -23,10 +24,11 @@
     "electron": "^35.2.1",
     "electron-builder": "^26.0.12",
     "sharp": "^0.34.2",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "vitest": "^3.2.4"
   },
   "build": {
-    "appId": "dev.openbookmark.desktop",
+    "appId": "app.openbookmark.desktop",
     "productName": "Open Bookmark",
     "directories": {
       "buildResources": "resources",
@@ -65,6 +67,7 @@
     ],
     "mac": {
       "icon": "icon.icns",
+      "identity": null,
       "target": [
         "dmg",
         "dir"

@@ -1,5 +1,6 @@
-import type { Bookmark, PageMetadata } from "#shared/types/bookmark";
+import type { Bookmark, BulkImportResult, PageMetadata } from "#shared/types/bookmark";
 import { BookmarkDomainError } from "#shared/errors/bookmarkErrors";
+import { parseBookmarkExportHtml } from "#shared/lib/parseBookmarkExportHtml";
 import { parseTagInput } from "#shared/lib/parseTagInput";
 import { normalizeNotesInput } from "../../lib/markdown";
 import { normalizeUrl, UrlValidationError } from "../utils/normalizeUrl";
@@ -111,6 +112,58 @@ export class BookmarkService {
     }
 
     return bookmark;
+  }
+
+  async importFromUrls(urlList: string[]): Promise<BulkImportResult> {
+    const seenNormalized = new Set<string>();
+    const seenInvalid = new Set<string>();
+    const uniqueUrls: string[] = [];
+
+    for (const entry of urlList) {
+      try {
+        const { normalized_url } = normalizeUrl(entry);
+        if (seenNormalized.has(normalized_url)) {
+          continue;
+        }
+        seenNormalized.add(normalized_url);
+        uniqueUrls.push(entry);
+      } catch {
+        if (seenInvalid.has(entry)) {
+          continue;
+        }
+        seenInvalid.add(entry);
+        uniqueUrls.push(entry);
+      }
+    }
+
+    let created = 0;
+    let skipped = 0;
+    const failed: Array<{ url: string; reason: string }> = [];
+
+    for (const entry of uniqueUrls) {
+      const result = await this.createFromUrl(entry);
+      if (result === "created") {
+        created++;
+      } else if (result === "skipped") {
+        skipped++;
+      } else {
+        failed.push({ url: entry, reason: result.failed });
+      }
+    }
+
+    return { created, skipped, failed };
+  }
+
+  async importFromHtml(html: string): Promise<BulkImportResult> {
+    const urlList = parseBookmarkExportHtml(html);
+    if (urlList.length === 0) {
+      throw new BookmarkDomainError(
+        "INVALID_URL",
+        "Keine gültigen http- oder https-Links in der HTML-Datei gefunden.",
+      );
+    }
+
+    return this.importFromUrls(urlList);
   }
 
   async createFromUrl(rawUrl: string): Promise<CreateFromUrlResult> {
