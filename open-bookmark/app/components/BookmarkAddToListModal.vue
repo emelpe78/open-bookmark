@@ -16,7 +16,7 @@ const emit = defineEmits<{
 const { addBookmarksToList } = useListAdmin();
 const toast = useToast();
 
-const selectedListId = ref<unknown>(undefined);
+const selectedListId = ref<string | undefined>(undefined);
 const saving = ref(false);
 
 watch(open, (isOpen) => {
@@ -25,13 +25,7 @@ watch(open, (isOpen) => {
   }
 });
 
-function parseListId(raw: unknown): number | null {
-  let value: string | undefined;
-  if (typeof raw === "string" || typeof raw === "number") {
-    value = String(raw);
-  } else if (raw && typeof raw === "object" && "value" in raw) {
-    value = String((raw as { value: string }).value);
-  }
+function parseListId(value: string | undefined): number | null {
   if (!value) {
     return null;
   }

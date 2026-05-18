@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { BookmarkListDetail, BookmarkListSummary } from "#shared/types/list";
+import { buildListShareContent } from "#shared/lib/shareLinks";
+import type { ShareContent } from "#shared/lib/shareLinks";
 import { extractFetchError } from "../../utils/extractFetchError";
 
 const {
@@ -23,9 +25,36 @@ const deleting = ref(false);
 const editOpen = ref(false);
 const editingList = ref<BookmarkListSummary | null>(null);
 
+const shareOpen = ref(false);
+const shareContent = ref<ShareContent | null>(null);
+const sharingListId = ref<number | null>(null);
+
 function openEdit(list: BookmarkListSummary): void {
   editingList.value = list;
   editOpen.value = true;
+}
+
+async function openShare(list: BookmarkListSummary): Promise<void> {
+  sharingListId.value = list.id;
+  try {
+    const result = await fetchListDetail(list.id);
+    shareContent.value = buildListShareContent(
+      result.list.name,
+      result.list.bookmarks.map((entry) => ({
+        title: entry.title ?? entry.site_name ?? entry.url,
+        url: entry.url,
+      })),
+    );
+    shareOpen.value = true;
+  } catch (error: unknown) {
+    toast.add({
+      title: "Teilen fehlgeschlagen",
+      description: extractFetchError(error, "Liste konnte nicht geladen werden"),
+      color: "error",
+    });
+  } finally {
+    sharingListId.value = null;
+  }
 }
 
 async function onListSaved(): Promise<void> {
@@ -155,6 +184,15 @@ function displayTitle(entry: { title: string | null; site_name: string | null; u
             />
           </button>
           <UButton
+            icon="i-lucide-share-2"
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            :loading="sharingListId === list.id"
+            :aria-label="`Liste ${list.name} teilen`"
+            @click.stop="openShare(list)"
+          />
+          <UButton
             icon="i-lucide-pencil"
             color="neutral"
             variant="ghost"
@@ -210,6 +248,8 @@ function displayTitle(entry: { title: string | null; site_name: string | null; u
         </div>
       </li>
     </ul>
+
+    <ShareContentModal v-model:open="shareOpen" :content="shareContent" />
 
     <SettingsListEditModal
       v-model:open="editOpen"

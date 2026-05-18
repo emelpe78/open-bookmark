@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Bookmark } from "#shared/types/bookmark";
+import { buildBookmarkShareContent } from "#shared/lib/shareLinks";
+import type { ShareContent } from "#shared/lib/shareLinks";
 
 const props = defineProps<{
   bookmark: Bookmark;
@@ -33,7 +35,15 @@ const {
 } = useBookmarkBulkSelection();
 
 const deleteOpen = ref(false);
+const shareOpen = ref(false);
+const shareContent = ref<ShareContent | null>(null);
 const refreshing = ref(false);
+
+function onShare(event: MouseEvent): void {
+  event.stopPropagation();
+  shareContent.value = buildBookmarkShareContent(displayTitle.value, props.bookmark.url);
+  shareOpen.value = true;
+}
 
 const selected = computed(() => isSelected(props.bookmark.id));
 
@@ -165,6 +175,14 @@ function confirmDelete() {
     <template v-if="!bulkActive" #footer>
       <div class="flex flex-wrap gap-2">
         <UButton
+          label="Teilen"
+          icon="i-lucide-share-2"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          @click="onShare"
+        />
+        <UButton
           label="Bearbeiten"
           icon="i-lucide-pencil"
           color="neutral"
@@ -192,6 +210,8 @@ function confirmDelete() {
       </div>
     </template>
   </UCard>
+
+  <ShareContentModal v-model:open="shareOpen" :content="shareContent" />
 
   <UModal v-model:open="deleteOpen" title="Lesezeichen löschen?">
     <template #body>
