@@ -25,7 +25,7 @@ open-bookmark/**/*.tsbuildinfo
 # IDE (lokal, Monorepo-Workspace)
 .vscode/
 
-# Lokale Docs (optional im Repo; PRD etc. liegen unter docs/)
+# Lokale Docs (nicht im öffentlichen Repo)
 docs/
 
 # OS
