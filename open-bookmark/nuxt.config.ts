@@ -7,10 +7,15 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"],
 
+  nitro: {
+    preset: "node-server",
+  },
+
   runtimeConfig: {
     databasePath: process.env.DATABASE_PATH || "./data/bookmarks.db",
     public: {
       appPort: process.env.APP_PORT || "3777",
+      isDesktop: process.env.OPEN_BOOKMARK_DESKTOP === "1",
     },
   },
 
@@ -21,6 +26,7 @@ export default defineNuxtConfig({
   $production: {
     nitro: {
       env: {
+        HOST: process.env.HOST || "127.0.0.1",
         PORT: process.env.APP_PORT || process.env.PORT || "3777",
       },
     },

@@ -46,4 +46,28 @@ describe("BookmarkRepository with tags", () => {
     expect(byId[id1]).toEqual(["alpha", "beta"]);
     expect(byId[id2]).toEqual(["gamma"]);
   });
+
+  it("reports list revision from count and latest updated_at", () => {
+    const db = createMemoryDatabase();
+    const bookmarkRepo = new BookmarkRepository(db);
+
+    expect(bookmarkRepo.getListRevision()).toEqual({
+      total: 0,
+      latestUpdatedAt: null,
+    });
+
+    bookmarkRepo.insert({
+      url: "https://a.com",
+      normalized_url: "https://a.com",
+      title: "A",
+      description: null,
+      image_url: null,
+      site_name: null,
+      notes: null,
+    });
+
+    const revision = bookmarkRepo.getListRevision();
+    expect(revision.total).toBe(1);
+    expect(revision.latestUpdatedAt).toMatch(/^\d{4}-\d{2}-\d{2}/);
+  });
 });

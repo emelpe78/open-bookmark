@@ -2,14 +2,40 @@
 
 Lokal betriebene Lesezeichen-App mit automatischer Metadaten-Extraktion, Tags, Markdown-Notizen und Kartenansicht.
 
-Technologie: **Nuxt 4**, **Nuxt UI**, **SQLite** (`better-sqlite3`), **Docker**. Die Anwendung liegt im Ordner [`open-bookmark/`](open-bookmark/).
+Technologie: **Nuxt 4**, **Nuxt UI**, **SQLite** (`better-sqlite3`), **Electron** (macOS Desktop). Die Web-App liegt im Ordner [`open-bookmark/`](open-bookmark/).
 
 ## Voraussetzungen
 
 - Node.js 22+
 - npm
+- macOS (für die Desktop-App)
 
-## Lokal starten
+## OpenBookmark Desktop (macOS)
+
+Installierbare App ohne Docker:
+
+```bash
+cd desktop
+npm install
+npm run build:runtime   # baut Nuxt + Extension + Node-Bundle
+npm run pack:dir        # erzeugt release/mac-arm64/OpenBookmark.app (unsigned)
+```
+
+Entwicklung (Electron lädt die lokale Nitro-Runtime):
+
+```bash
+cd open-bookmark && npm run build
+cd desktop && npm install && npm run dev
+```
+
+Die App startet den Dienst auf **`http://127.0.0.1:3777`** und speichert die Datenbank unter  
+`~/Library/Application Support/OpenBookmark/bookmarks.db`.
+
+**Gatekeeper:** Unsigned Builds musst du unter *Systemeinstellungen → Datenschutz & Sicherheit* einmal erlauben.
+
+Details: [`desktop/README.md`](desktop/README.md)
+
+## Lokal entwickeln (Web)
 
 ```bash
 cd open-bookmark
@@ -20,7 +46,7 @@ npm run dev
 
 Die App läuft unter [http://localhost:3777](http://localhost:3777).
 
-**Wichtig:** `npm run dev` immer im Ordner `open-bookmark/` ausführen (nicht im Repository-Root). Ist Port 3777 belegt, weicht Nuxt auf 3000 aus — dann die URL in der Konsole nutzen oder den anderen Prozess beenden.
+**Wichtig:** `npm run dev` immer im Ordner `open-bookmark/` ausführen. Ist Port 3777 belegt, weicht Nuxt auf einen anderen Port aus — dann die URL in der Konsole nutzen oder den anderen Prozess beenden.
 
 ### Typecheck
 
@@ -29,30 +55,13 @@ cd open-bookmark
 npm run typecheck
 ```
 
-## Docker
-
-Vom Repository-Root:
-
-```bash
-docker compose up --build
-```
-
-Die App läuft unter [http://localhost:3778](http://localhost:3778) (Dev weiterhin auf Port 3777).
-
-Oder manuell:
-
-```bash
-docker build -t open-bookmark ./open-bookmark
-docker run -p 3778:3778 -v openbookmark_data:/data open-bookmark
-```
-
 ## Umgebungsvariablen
 
 | Variable | Standard | Beschreibung |
 |----------|----------|--------------|
-| `APP_PORT` | `3777` | Port für Dev-Server |
-| `DATABASE_PATH` | `./data/bookmarks.db` | Pfad zur SQLite-Datei (lokal); im Container `/data/bookmarks.db` |
-| `PORT` | `3778` (Docker) / `3777` (Dev) | Port im Production-Container bzw. Dev-Server |
+| `APP_PORT` | `3777` | Port für Dev-Server und Desktop |
+| `DATABASE_PATH` | `./data/bookmarks.db` | Pfad zur SQLite-Datei (lokal); Desktop setzt Application Support automatisch |
+| `HOST` | `127.0.0.1` (Production) | Bind-Adresse der Nitro-Runtime |
 
 Siehe [`open-bookmark/.env.example`](open-bookmark/.env.example).
 
@@ -69,15 +78,26 @@ Siehe [`open-bookmark/.env.example`](open-bookmark/.env.example).
 
 ## Chrome Extension
 
-Die Browser-Extension liegt in [`extension/`](extension/). Sie speichert Seiten und Links per `POST /api/bookmarks` in deiner konfigurierten Instanz.
+Die Browser-Extension liegt in [`extension/`](extension/). Sie speichert Seiten per `POST /api/bookmarks` in deiner lokalen Instanz (Desktop oder Dev).
 
-Kurzanleitung: [`extension/README.md`](extension/README.md) (Build, Installation als entpackte Erweiterung, Server-URL).
+Kurzanleitung: [`extension/README.md`](extension/README.md) (Build, Side-Load, Server-URL `http://localhost:3777`).
+
+In der Desktop-App: Menü **Hilfe → Browser-Erweiterung** oder Route `/extension`.
 
 ## Repository-Struktur
 
 ```
-open-bookmark/          # Nuxt-App (Quellcode, package.json, Dockerfile)
+open-bookmark/          # Nuxt-App (Quellcode, API, SQLite)
 extension/              # Chrome Extension (Manifest V3)
-docker-compose.yml      # Container-Setup
+desktop/                # Electron-Shell für macOS
+docs/                   # PRD, ADRs
 README.md               # Diese Datei
+```
+
+## Tests
+
+```bash
+cd open-bookmark && npm run test && npm run typecheck
+cd extension && npm run test && npm run typecheck
+cd desktop && npm run typecheck
 ```

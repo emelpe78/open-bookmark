@@ -41,6 +41,14 @@ const { openAdd, addOpen, editOpen } = useBookmarkModals();
             clear
           />
           <UButton
+            to="/extension"
+            label="Extension"
+            icon="i-lucide-puzzle"
+            color="neutral"
+            variant="outline"
+            class="shrink-0"
+          />
+          <UButton
             label="Hinzufügen"
             icon="i-lucide-plus"
             class="shrink-0"

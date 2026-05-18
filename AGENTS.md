@@ -1,15 +1,16 @@
 # AGENTS.md
 
-Leitfaden für AI-Agents am Projekt **Open-Bookmark** — lokaler Bookmark-Manager (Nuxt 4, SQLite, Docker) plus **Chrome Extension** (Manifest V3). Details: [`README.md`](README.md), Extension: [`extension/README.md`](extension/README.md).
+Leitfaden für AI-Agents am Projekt **Open-Bookmark** — lokaler Bookmark-Manager (Nuxt 4, SQLite, **Electron Desktop macOS**) plus **Chrome Extension** (Manifest V3). Details: [`README.md`](README.md), Desktop: [`desktop/README.md`](desktop/README.md), Extension: [`extension/README.md`](extension/README.md).
 
 ## Produkt (MVP)
 
-- Self-hosted, **local-first**, Single-User, **ohne Auth**, **ohne LLM**
+- **local-first**, Single-User, **ohne Auth**, **ohne LLM**
 - URLs speichern, Metadaten per Server-Fetch (Cheerio), Karten-UI, Suche, Tags, Markdown-Notizen
-- **Chrome Extension:** Seiten/Links aus dem Browser speichern und bestehende Bookmarks (Tags, Notizen) per Popup aktualisieren
+- **macOS Desktop-App:** Electron startet Nitro auf `127.0.0.1:3777`, SQLite unter Application Support
+- **Chrome Extension:** Side-Load aus `extension/dist`; speichert per HTTP-API (kein Store im MVP)
 - Open Source — keine Secrets, keine `.db`-Dateien committen
 
-**Nicht einführen** (ohne explizite Anfrage): Auth, Accounts, Playwright/Crawling, Cron/Worker, externe DB, FTS, Cloud-only.
+**Nicht einführen** (ohne explizite Anfrage): Auth, Accounts, Playwright/Crawling, Cron/Worker, externe DB, FTS, Cloud-only, Docker.
 
 ## Repository-Layout
 
@@ -17,14 +18,15 @@ Leitfaden für AI-Agents am Projekt **Open-Bookmark** — lokaler Bookmark-Manag
 |------|--------|
 | `open-bookmark/` | Nuxt-4-App (Quellcode, API, SQLite) |
 | `extension/` | Chrome Extension (MV3, Vite, TypeScript) |
-| `docker-compose.yml` | Container-Setup für die Web-App |
+| `desktop/` | Electron Main/Preload, Packaging |
+| `docs/` | PRD, ADRs |
 
 ## Stack & Layout (Web-App)
 
 | Bereich | Pfad (`open-bookmark/`) |
 |---------|-------------------------|
 | UI | `app/pages/`, `app/components/`, `app/layouts/` |
-| Composables | `app/composables/useBookmarks.ts`, `useBookmarkModals.ts`, `useBookmarkForm.ts` |
+| Composables | `app/composables/useBookmarks.ts`, `useBookmarkModals.ts`, `useBookmarkForm.ts`, `useDesktopBridge.ts` |
 | Shared | `shared/constants/`, `shared/lib/`, `shared/errors/`, `shared/types/` |
 | Domain | `server/domain/bookmarkService.ts`, `createBookmarkService.ts` |
 | Repositories | `server/repositories/bookmarkRepository.ts`, `tagRepository.ts` |
@@ -32,6 +34,23 @@ Leitfaden für AI-Agents am Projekt **Open-Bookmark** — lokaler Bookmark-Manag
 | HTTP-Adapter | `server/utils/http/mapBookmarkError.ts`, `parseRouteParams.ts` |
 | Metadaten | `server/utils/metadata.ts` (`extractMetadataFromHtml`, `fetchPageHtml`) |
 | Markdown | `lib/markdown.ts` |
+| Extension-Onboarding | `app/pages/extension.vue`, `app/components/OnboardingModal.vue` |
+
+## Desktop (`desktop/`)
+
+| Bereich | Pfad |
+|---------|------|
+| Main | `src/main.ts` |
+| Preload | `src/preload.ts` → `window.openBookmarkDesktop` |
+| Runtime-Start | `src/runtime/startRuntime.ts` (Child: `node .output/server/index.mjs`) |
+| Packaging | `package.json` → `electron-builder`, `scripts/build-runtime.sh` |
+
+**Desktop-Regeln**
+
+- Keine Fachlogik in Electron — nur Shell, Spawn, IPC, Packaging.
+- `HOST=127.0.0.1`, Port **3777** fix (MVP); bei `EADDRINUSE` Fehler-UI.
+- `DATABASE_PATH` = `app.getPath('userData')/bookmarks.db`, `app.setName('OpenBookmark')`.
+- Renderer: `contextIsolation` + `sandbox`, kein `nodeIntegration`.
 
 ## Chrome Extension (`extension/`)
 
@@ -43,62 +62,44 @@ Eigenes npm-Package — **kein** Nuxt, **kein** Nuxt UI. TypeScript + Vite + `@c
 | Einstellungen | `src/options/` |
 | Service Worker | `src/background/service-worker.ts` (Kontextmenü) |
 | API-Client | `src/lib/openBookmarkApi.ts`, `apiClient.ts` |
-| Speichern | `src/lib/saveBookmark.ts` (`saveOrUpdateBookmark`: Create oder PATCH bei Duplikat + Formularänderung) |
-| Tab-URL | `src/lib/activeTab.ts` (`chrome.scripting` + Fallback `tab.url`) |
-| Konfiguration | `src/lib/config.ts` (`chrome.storage.sync`: `serverBaseUrl`) |
-| Tags/Formular | `src/lib/tagCache.ts`, `userPreferences.ts`, `parseTagInput.ts` |
+| Speichern | `src/lib/saveBookmark.ts` |
+| Konfiguration | `src/lib/config.ts` (`DEFAULT_SERVER_BASE_URL`: `http://localhost:3777`) |
 
 **Extension-Regeln**
 
-- Nutzt **nur** die bestehende HTTP-API der Web-App — keine parallele Backend-Logik, keine Metadaten-Extraktion in der Extension.
-- Host-Zugriff über `optional_host_permissions` + dynamisches `chrome.permissions.request` — **kein** CORS-Workaround in `nuxt.config.ts` nötig.
-- Server-Basis-URL muss zum laufenden Port passen (Dev `3777`, Docker oft `3778`).
-- Tags beim Update werden **ersetzt** (wie Web-App), nicht gemerged — bestehende Tags im Popup anzeigen/vorausfüllen.
-- Unit-Tests nur für `src/lib/*` (Vitest, Mock `fetch`/`chrome`); keine Chrome-E2E im Repo.
-
-**Extension entwickeln**
+- Nutzt **nur** die HTTP-API — keine Backend-Duplikation.
+- Server-URL: Desktop/Dev **`http://localhost:3777`** (≈ `127.0.0.1:3777`).
+- Side-Load only im MVP; In-App-Anleitung unter `/extension`.
 
 ```bash
-cd extension && npm install && npm run build   # Output: extension/dist
+cd extension && npm install && npm run build
 cd extension && npm run test && npm run typecheck
 ```
 
-Installation: entpackte Erweiterung aus `extension/dist` in Chrome laden.
+**Wichtig:** Domain wirft **keine** `createError`-HTTP-Fehler — nur `BookmarkDomainError`. HTTP-Mapping in `server/utils/http/`.
 
-**Wichtig:** Domain und Repositories werfen **keine** `createError`-HTTP-Fehler — nur `BookmarkDomainError`. HTTP-Mapping ausschließlich in `server/utils/http/` und API-Routen.
-
-**Env:** `APP_PORT=3777`, `DATABASE_PATH` (lokal `./data/bookmarks.db`, Docker `/data/bookmarks.db`).
+**Env:** `APP_PORT=3777`, `DATABASE_PATH` (Dev: `./data/bookmarks.db`; Desktop setzt Application Support).
 
 ## UI-Regeln
 
-- **Nuxt UI** — kein Tailwind-first-Styling; Theming `app/app.config.ts`
+- **Nuxt UI** — Theming `app/app.config.ts`
 - Formulare: `BookmarkFormFields` + `useBookmarkForm`; Fehler: `extractFetchError`
-- Add: `BookmarkAddModal` | Edit: `BookmarkEditModal` (kein Inline-Edit)
+- Add: `BookmarkAddModal` | Edit: `BookmarkEditModal`
 
 ## Datenbank
 
 Tabellen: `bookmarks`, `tags`, `bookmark_tags`. Duplikate über `normalized_url`. Leere Notizen als `null`.
 
-## URL & Ingestion
-
-`normalizeUrl` → Metadaten (`resolvePageMetadata`, Fallback bei Fehler) → speichern. Bulk: `POST /api/bookmarks` mit `{ urls: "a, b" }`.
-
-## Pagination
-
-Default **10**, Optionen aus `shared/constants/pagination.ts` (10/25/50/100). `BookmarkListPagination` oben und unten.
-
 ## API
-
-Gilt für Web-App und Extension (Extension nutzt Teilmenge).
 
 | Methode | Pfad | Extension |
 |---------|------|-----------|
-| GET | `/api/bookmarks` | Suche nach URL (Duplikat/Update) |
-| POST | `/api/bookmarks` | Neu speichern (Popup, Kontextmenü) |
-| PATCH | `/api/bookmarks/:id` | Tags/Notizen aktualisieren |
+| GET | `/api/bookmarks` | Duplikat/Update |
+| POST | `/api/bookmarks` | Speichern |
+| PATCH | `/api/bookmarks/:id` | Tags/Notizen |
 | DELETE | `/api/bookmarks/:id` | — |
-| GET | `/api/tags` | Vorschläge, Verbindungstest |
-| POST | `/api/bookmarks/:id/refresh` | Metadaten neu laden (Duplikat-UI) |
+| GET | `/api/tags` | Vorschläge, Health |
+| POST | `/api/bookmarks/:id/refresh` | Metadaten neu laden |
 
 ## Entwicklung
 
@@ -106,24 +107,30 @@ Gilt für Web-App und Extension (Extension nutzt Teilmenge).
 
 ```bash
 cd open-bookmark && npm install && npm run dev
-npm run typecheck
-npm run test
+npm run typecheck && npm run test
 ```
 
-**Extension** (eigenständig im Ordner `extension/`)
+**Desktop**
 
 ```bash
-cd extension && npm install && npm run dev    # oder: npm run build
-npm run typecheck
-npm run test
+cd open-bookmark && npm run build
+cd desktop && npm install && npm run dev
+cd desktop && npm run build:runtime && npm run pack:dir
+```
+
+**Extension**
+
+```bash
+cd extension && npm install && npm run build
+npm run typecheck && npm run test
 ```
 
 ## Sicherheit
 
-Niemals `.env`, `*.db`, Keys committen.
+Niemals `.env`, `*.db`, Keys committen. Nitro nur auf Loopback (`127.0.0.1`).
 
 ## Definition of Done
 
-**Web-App:** MVP-Scope, SQLite, Nuxt UI, Docker-tauglich, `npm run test` + `typecheck` grün in `open-bookmark/`. Domain ohne HTTP; eine Quelle für Pagination, Tags, Fehlermeldungen.
-
-**Extension:** `npm run test` + `typecheck` + `build` grün in `extension/`; nutzt API ohne Backend-Änderungen; `extension/README.md` aktuell.
+**Web-App:** SQLite, Nuxt UI, `npm run test` + `typecheck` grün in `open-bookmark/`.
+**Desktop:** `npm run typecheck` + `pack:dir` grün in `desktop/`; Runtime + Extension-Onboarding dokumentiert.
+**Extension:** `npm run test` + `typecheck` + `build` grün; README aktuell; API unverändert.

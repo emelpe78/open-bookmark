@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenBookmark — Fehler</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        line-height: 1.5;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #111;
+        color: #f5f5f5;
+        padding: 2rem;
+      }
+      main {
+        max-width: 36rem;
+      }
+      h1 {
+        margin-top: 0;
+        font-size: 1.5rem;
+      }
+      pre {
+        white-space: pre-wrap;
+        background: #1f1f1f;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1rem;
+      }
+      p.muted {
+        color: #aaa;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>OpenBookmark konnte nicht starten</h1>
+      <pre id="message"></pre>
+      <p class="muted">
+        Typische Ursachen: Port 3777 ist belegt, Nitro-Build fehlt, oder Node konnte die
+        Runtime nicht starten. Logs: Application Support → OpenBookmark → logs/runtime.log
+      </p>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      document.getElementById("message").textContent =
+        params.get("message") ?? "Unbekannter Fehler.";
+    </script>
+  </body>
+</html>

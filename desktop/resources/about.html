@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Über Open Bookmark</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 24px 24px;
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "SF Pro Text",
+          system-ui,
+          sans-serif;
+        background: #2a2a2a;
+        color: #f5f5f5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        text-align: center;
+        gap: 0;
+      }
+
+      .icon {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 18px;
+        object-fit: contain;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .version {
+        margin: 0 0 14px;
+        font-size: 12px;
+        color: #b0b0b0;
+      }
+
+      .copyright {
+        margin: 0 0 22px;
+        font-size: 11px;
+        color: #9a9a9a;
+        line-height: 1.45;
+        max-width: 260px;
+      }
+
+      button {
+        min-width: 72px;
+        padding: 6px 22px;
+        border: none;
+        border-radius: 6px;
+        background: #0a84ff;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: default;
+      }
+
+      button:hover {
+        background: #0077ed;
+      }
+
+      button:focus-visible {
+        outline: 2px solid #64b5ff;
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <img class="icon" src="icon.png" width="96" height="96" alt="" />
+      <h1 id="app-name">Open Bookmark</h1>
+      <p class="version" id="version"></p>
+      <p class="copyright" id="copyright"></p>
+      <button type="button" id="ok">OK</button>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get("name") || "Open Bookmark";
+      const version = params.get("version") || "";
+      const copyright = params.get("copyright") || "";
+
+      document.getElementById("app-name").textContent = name;
+      document.getElementById("version").textContent = version
+        ? `Version ${version} (${version})`
+        : "";
+      document.getElementById("copyright").textContent = copyright;
+      document.getElementById("ok").addEventListener("click", () => window.close());
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" || event.key === "Enter") {
+          window.close();
+        }
+      });
+    </script>
+  </body>
+</html>

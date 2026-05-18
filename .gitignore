@@ -4,6 +4,12 @@ node_modules/
 .output/
 dist/
 
+# Desktop (Electron)
+desktop/node_modules/
+desktop/dist/
+desktop/release/
+desktop/resources/node/
+
 # Chrome Extension
 extension/node_modules/
 extension/dist/
@@ -29,8 +35,8 @@ open-bookmark/**/*.tsbuildinfo
 # IDE (lokal, Monorepo-Workspace)
 .vscode/
 
-# Lokale Docs (nicht im öffentlichen Repo)
-docs/
+# Lokale Docs (nicht im öffentlichen Repo) — ADRs ausnehmen
+docs/*
 
 # OS
 .DS_Store
@@ -43,3 +49,4 @@ CONTEXT.md
 .out-of-scope/
 .scratch/
 scripts/
+!desktop/scripts/

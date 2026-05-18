@@ -1,14 +1,14 @@
 # OpenBookmark Chrome Extension
 
-Manifest-V3-Extension zum Speichern der aktuellen Seite oder eines Links in deiner [OpenBookmark](../open-bookmark/)-Instanz — inkl. optionaler Tags (`POST /api/bookmarks`, `GET /api/tags` für Vorschläge).
+Manifest-V3-Extension zum Speichern der aktuellen Seite oder eines Links in deiner OpenBookmark-Instanz — inkl. optionaler Tags (`POST /api/bookmarks`, `GET /api/tags` für Vorschläge).
 
 ## Voraussetzungen
 
 - Google Chrome oder Chromium
-- Laufende OpenBookmark-Instanz (lokal, Docker oder eigene URL)
+- Laufende OpenBookmark-Instanz (Desktop-App, lokaler Dev-Server oder eigene URL)
 - Node.js 22+ (nur für Entwicklung/Build)
 
-## Installation (Entwicklung)
+## Installation (Side-Load)
 
 ```bash
 cd extension
@@ -17,6 +17,8 @@ npm run build
 ```
 
 In Chrome: `chrome://extensions` → **Entwicklermodus** → **Entpackte Erweiterung laden** → Ordner `extension/dist` wählen.
+
+Mit der **OpenBookmark Desktop-App** findest du unter **Browser-Erweiterung** eine Schritt-für-Schritt-Anleitung und kannst den `dist`-Ordner direkt öffnen.
 
 Für Live-Entwicklung:
 
@@ -30,16 +32,13 @@ Danach erneut `extension/dist` laden; Änderungen nach Reload der Extension.
 
 1. Extension-Icon → **Einstellungen**, oder Rechtsklick auf das Icon → Optionen.
 2. **Server-Basis-URL** eintragen, z. B.:
-   - Lokaler Dev-Server: `http://localhost:3777`
-   - Docker (`docker compose` vom Repo-Root): `http://localhost:3778`
-   - Eigene Domain: `https://bookmark.example.com`
+   - OpenBookmark Desktop / lokaler Dev-Server: `http://localhost:3777`
+   - Eigene gehostete Instanz: `https://bookmark.example.com`
 3. **Speichern** und Host-Zugriff bestätigen, wenn Chrome danach fragt.
 
-Standard beim ersten Start: `http://localhost:3777`.
+Standard beim ersten Start: `http://localhost:3777` (entspricht `http://127.0.0.1:3777` der Desktop-App).
 
 **Hinweis:** Die OpenBookmark-App muss erreichbar sein, bevor du speicherst. Metadaten (Titel, Beschreibung) holt der Server — das kann einige Sekunden dauern.
-
-**Wichtig:** Die Server-URL in den Extension-Einstellungen muss zum Port passen, unter dem deine App läuft (z. B. Dev oft `3777` oder `3779`, Docker `3778`). Sonst speicherst du in eine andere Instanz als die, die du im Browser offen hast.
 
 ## Nutzung
 

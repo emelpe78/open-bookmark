@@ -60,6 +60,15 @@ export function useBookmarks() {
 
   const { data: tagsData, refresh: refreshTags } = useFetch<TagsResponse>("/api/tags");
 
+  if (import.meta.client) {
+    const { start: startAutoSync } = useBookmarkListAutoSync({
+      onChanged: async () => {
+        await Promise.all([refresh(), refreshTags()]);
+      },
+    });
+    startAutoSync();
+  }
+
   const tagOptions = computed(() =>
     (tagsData.value?.tags ?? []).map((entry) => ({
       label: `${entry.name} (${entry.count})`,

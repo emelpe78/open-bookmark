@@ -44,6 +44,10 @@ export class BookmarkService {
     };
   }
 
+  getListRevision() {
+    return this.bookmarkRepo.getListRevision();
+  }
+
   getById(id: number): Bookmark | null {
     const tags = this.tagRepo.getTagsForBookmark(id);
     const tagsMap = new Map([[id, tags]]);

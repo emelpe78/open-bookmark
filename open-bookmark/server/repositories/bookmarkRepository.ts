@@ -1,5 +1,6 @@
 import type Database from "better-sqlite3";
 import type { Bookmark } from "#shared/types/bookmark";
+import type { BookmarkListRevision } from "#shared/types/bookmarkRevision";
 import {
   DEFAULT_PAGE_SIZE,
   MAX_PAGE_SIZE,
@@ -127,6 +128,24 @@ export class BookmarkRepository {
       total: totalRow.count,
       page,
       pageSize,
+    };
+  }
+
+  getListRevision(): BookmarkListRevision {
+    const row = this.db
+      .prepare(
+        `
+        SELECT
+          COUNT(*) AS total,
+          MAX(updated_at) AS latestUpdatedAt
+        FROM bookmarks
+      `,
+      )
+      .get() as { total: number; latestUpdatedAt: string | null };
+
+    return {
+      total: row.total,
+      latestUpdatedAt: row.latestUpdatedAt,
     };
   }
 

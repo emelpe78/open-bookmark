@@ -1,0 +1,78 @@
+{
+  "name": "open-bookmark-desktop",
+  "private": true,
+  "version": "0.3.0",
+  "description": "Open Bookmark — native macOS shell (Electron)",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "npm run icons && npm run build && electron .",
+    "start": "electron .",
+    "typecheck": "tsc --noEmit",
+    "icons": "bash scripts/generate-icons.sh",
+    "prepare-node": "bash scripts/prepare-node.sh",
+    "build:runtime": "bash scripts/build-runtime.sh",
+    "prepack": "npm run icons",
+    "pack": "npm run build:runtime && npm run build && electron-builder --mac",
+    "pack:dir": "npm run build:runtime && npm run build && electron-builder --mac dir",
+    "postinstall": "npm run icons && bash scripts/patch-electron-mac.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "electron": "^35.2.1",
+    "electron-builder": "^26.0.12",
+    "sharp": "^0.34.2",
+    "typescript": "~5.8.3"
+  },
+  "build": {
+    "appId": "dev.openbookmark.desktop",
+    "productName": "Open Bookmark",
+    "directories": {
+      "buildResources": "resources",
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "src/error.html",
+      "package.json",
+      "resources/icon.png",
+      "resources/icon.icns",
+      "resources/about.html"
+    ],
+    "extraResources": [
+      {
+        "from": "../open-bookmark/.output",
+        "to": "open-bookmark/.output"
+      },
+      {
+        "from": "../open-bookmark/node_modules",
+        "to": "open-bookmark/node_modules"
+      },
+      {
+        "from": "../open-bookmark/package.json",
+        "to": "open-bookmark/package.json"
+      },
+      {
+        "from": "../extension/dist",
+        "to": "extension-dist"
+      },
+      {
+        "from": "resources/node",
+        "to": "node"
+      }
+    ],
+    "mac": {
+      "icon": "icon.icns",
+      "target": [
+        "dmg",
+        "dir"
+      ],
+      "category": "public.app-category.productivity",
+      "extendInfo": {
+        "CFBundleDisplayName": "Open Bookmark",
+        "CFBundleName": "Open Bookmark"
+      }
+    }
+  }
+}
