@@ -18,6 +18,7 @@ Technologie: **Nuxt 4**, **Nuxt UI**, **SQLite** (`better-sqlite3`), **Electron*
   - [Bookmarks](#bookmarks)
   - [Tags](#tags)
   - [Listen](#listen)
+  - [Datenbank](#datenbank)
   - [Beispiel (curl)](#beispiel-bookmark-speichern-extension--curl)
 - [Chrome Extension](#chrome-extension)
 - [Repository-Struktur](#repository-struktur)
@@ -127,6 +128,9 @@ HTTP-JSON-API der Nuxt/Nitro-Runtime. Basis-URL in Dev und Desktop:
 | `GET` | `/api/lists/:id` | Liste inkl. Bookmarks |
 | `PATCH` | `/api/lists/:id` | Liste bearbeiten |
 | `DELETE` | `/api/lists/:id` | Liste löschen |
+| `GET` | `/api/database` | Datenbankpfad, Größe, Lesezeichen-Anzahl |
+| `GET` | `/api/database/backup` | SQL-Backup (Download) |
+| `POST` | `/api/database/import` | Datenbank aus SQL-Backup **ersetzen** |
 
 Route-Parameter `:id` sind positive Ganzzahlen.
 
@@ -445,6 +449,91 @@ Löscht die Liste; Bookmarks bleiben erhalten.
 
 ```json
 { "ok": true }
+```
+
+---
+
+### Datenbank
+
+Endpunkte für Einstellungen → **Datenbank** (Pfad anzeigen, Backup, Import). Die **Desktop-App** führt Import und Pfadänderung zusätzlich über Electron-IPC aus (Runtime-Neustart); die HTTP-API gilt für Dev, Tests und Skripte.
+
+**Datenbank-Pfade**
+
+| Umgebung | SQLite-Datei |
+|----------|----------------|
+| `npm run dev` (Web) | `./data/bookmarks.db` (über `DATABASE_PATH` in `.env`) |
+| Desktop-App | `~/Library/Application Support/Open Bookmark/bookmarks.db` (optional anderer Pfad in `preferences.json`) |
+
+Web-Dev und Desktop nutzen **getrennte** Dateien — Import in der Dev-API überschreibt nur die Dev-Datenbank.
+
+#### `GET /api/database`
+
+Metadaten zur aktuell verbundenen SQLite-Datei.
+
+**Antwort** `200`
+
+```json
+{
+  "path": "/Users/you/Library/Application Support/Open Bookmark/bookmarks.db",
+  "sizeBytes": 65536,
+  "bookmarkCount": 12,
+  "isDesktop": true
+}
+```
+
+| Feld | Typ | Beschreibung |
+|------|-----|--------------|
+| `path` | string | Absoluter Pfad zur `.db`-Datei |
+| `sizeBytes` | number \| null | Dateigröße in Bytes; `null` bei `:memory:` o. ä. |
+| `bookmarkCount` | number | Anzahl Zeilen in `bookmarks` |
+| `isDesktop` | boolean | `true`, wenn Nitro mit `OPEN_BOOKMARK_DESKTOP=1` läuft (Desktop-Child) |
+
+Die Desktop-App nutzt `isDesktop` beim Start als Health-Check (Port 3777 darf nicht von `npm run dev` belegt sein).
+
+---
+
+#### `GET /api/database/backup`
+
+Erzeugt ein **SQL-Dump** (Schema + Daten) der laufenden Datenbank. Format entspricht dem, was `POST /api/database/import` erwartet.
+
+**Antwort** `200` — Body: SQL-Text (`Content-Type: application/sql; charset=utf-8`)
+
+Header `Content-Disposition: attachment; filename="open-bookmark-backup-YYYY-MM-DD-HHmm.sql"`
+
+Vor dem Dump wird ein WAL-Checkpoint ausgeführt (konsistenter Stand).
+
+**Beispiel**
+
+```bash
+curl -s -o backup.sql http://localhost:3777/api/database/backup
+```
+
+---
+
+#### `POST /api/database/import`
+
+**Ersetzt die gesamte Datenbank** durch den Inhalt einer SQL-Datei (Open-Bookmark-Backup). Bestehende Lesezeichen, Tags und Listen gehen verloren, sofern sie nicht im Dump enthalten sind.
+
+**Body:** Roher SQL-Text (`Content-Type: application/sql` oder `text/plain`), kein JSON.
+
+| Limit / Regel | Wert |
+|---------------|------|
+| Maximale Größe | 50 MB |
+| Erwarteter Inhalt | `CREATE TABLE` und/oder `INSERT INTO` (Export von `GET /api/database/backup`) |
+| Nicht erlaubt | u. a. `ATTACH`, `DETACH` |
+
+**Antwort** `200` — wie `GET /api/database` (aktualisierte Metadaten nach Import)
+
+**Fehler** `400` — leere Datei, zu groß, ungültiges Format, SQL-Fehler beim Ausführen (DB wird dann mit leerem Schema wiederhergestellt)
+
+**Hinweis Desktop:** In der App löst **SQL importieren** denselben Import über ein Child-`node`-Skript aus (`scripts/import-database.mjs`), nicht diesen HTTP-Endpunkt — der Nitro-Prozess wird dafür kurz gestoppt.
+
+**Beispiel**
+
+```bash
+curl -s -X POST http://localhost:3777/api/database/import \
+  -H 'Content-Type: application/sql' \
+  --data-binary @backup.sql
 ```
 
 ---
