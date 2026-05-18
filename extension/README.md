@@ -10,15 +10,22 @@ Manifest-V3-Extension zum Speichern der aktuellen Seite oder eines Links in dein
 
 ## Installation (Side-Load)
 
+1. Neueste Version von [GitHub Releases](https://github.com/emelpe78/open-bookmark/releases) herunterladen (Asset `open-bookmark-extension-v….zip`).
+2. ZIP entpacken und den Ordner an einem festen Ort speichern, z. B. `~/Applications/Open-Bookmark-Extension/` (darin liegt die `manifest.json`).
+3. Chrome: `chrome://extensions` → **Entwicklermodus** → **Entpackte Erweiterung laden** → diesen Ordner wählen (nicht die ZIP).
+4. In den Extension-Einstellungen die Basis-URL `http://localhost:3777` eintragen und Host-Zugriff bestätigen.
+
+In der **Open Bookmark Desktop-App**: Menü **Hilfe → Browser-Erweiterung** oder Route `/extension` — dort findest du die gleiche Anleitung mit Shortcuts.
+
+### Aus dem Quellcode bauen (Entwicklung)
+
 ```bash
 cd extension
 npm install
 npm run build
 ```
 
-In Chrome: `chrome://extensions` → **Entwicklermodus** → **Entpackte Erweiterung laden** → Ordner `extension/dist` wählen.
-
-Mit der **Open Bookmark Desktop-App** findest du unter **Browser-Erweiterung** eine Schritt-für-Schritt-Anleitung und kannst den `dist`-Ordner direkt öffnen.
+Danach in Chrome den Ordner `extension/dist` laden.
 
 Für Live-Entwicklung:
 

@@ -597,7 +597,7 @@ curl -s 'http://localhost:3777/api/bookmarks?search=example&pageSize=25'
 
 Die Browser-Extension liegt in [`extension/`](extension/). Sie speichert Seiten per `POST /api/bookmarks` in deiner lokalen Instanz (Desktop oder Dev).
 
-Kurzanleitung: [`extension/README.md`](extension/README.md) (Build, Side-Load, Server-URL `http://localhost:3777`).
+Kurzanleitung: Extension-Zip von [GitHub Releases](https://github.com/emelpe78/open-bookmark/releases) laden, entpacken (z. B. `~/Applications/Open-Bookmark-Extension/`), in Chrome per Entwicklermodus installieren — Details in [`extension/README.md`](extension/README.md) und in der App unter `/extension`.
 
 In der Desktop-App: Menü **Hilfe → Browser-Erweiterung** oder Route `/extension`.
 

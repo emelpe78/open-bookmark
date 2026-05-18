@@ -7,7 +7,7 @@ Leitfaden für AI-Agents am Projekt **Open Bookmark** — lokaler Bookmark-Manag
 - **local-first**, Single-User, **ohne Auth**, **ohne LLM**
 - URLs speichern (einzeln + Bulk), Metadaten per Server-Fetch (Cheerio), Karten-UI, Suche/Filter, Tags, **Listen**, Markdown-Notizen
 - **macOS Desktop-App:** Electron startet Nitro auf `127.0.0.1:3777`, SQLite unter Application Support
-- **Chrome Extension:** Side-Load aus `extension/dist`; speichert per HTTP-API (kein Store im MVP)
+- **Chrome Extension:** Side-Load aus GitHub-Releases-Zip (Dev: `extension/dist`); speichert per HTTP-API (kein Store im MVP)
 - Open Source — keine Secrets, keine `.db`-Dateien committen
 
 **Nicht einführen** (ohne explizite Anfrage): Auth, Accounts, Playwright/Crawling, Cron/Worker, externe DB, FTS, Cloud-only, Docker.
@@ -72,7 +72,7 @@ Eigenes npm-Package — **kein** Nuxt, **kein** Nuxt UI. TypeScript + Vite + `@c
 
 - Nutzt **nur** die HTTP-API — keine Backend-Duplikation.
 - Server-URL: Desktop/Dev **`http://localhost:3777`** (≈ `127.0.0.1:3777`).
-- Side-Load only im MVP; In-App-Anleitung unter `/extension`.
+- Side-Load only im MVP (Release-Zip von GitHub); In-App-Anleitung unter `/extension`.
 
 ```bash
 cd extension && npm install && npm run build

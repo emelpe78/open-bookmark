@@ -7,8 +7,7 @@ import {
 const open = defineModel<boolean>("open", { default: false });
 
 const step = ref(0);
-const toast = useToast();
-const { isElectron, openExtensionFolder } = useDesktopBridge();
+const { openGitHubReleases } = useDesktopBridge();
 
 const steps = [
   {
@@ -28,7 +27,7 @@ const steps = [
   {
     title: "Browser-Erweiterung",
     description:
-      "Lade die entpackte Extension aus dem dist-Ordner in Chrome. So speicherst du Seiten direkt aus dem Browser.",
+      "Lade die Extension von GitHub Releases, entpacke sie z. B. nach ~/Applications/ und installiere sie in Chrome per Entwicklermodus.",
   },
 ];
 
@@ -46,16 +45,6 @@ function goToExtensionPage() {
   navigateTo("/extension");
 }
 
-async function handleOpenExtensionFolder(): Promise<void> {
-  const result = await openExtensionFolder();
-  if (!result.ok) {
-    toast.add({
-      title: "Ordner öffnen fehlgeschlagen",
-      description: result.message,
-      color: "error",
-    });
-  }
-}
 </script>
 
 <template>
@@ -99,12 +88,11 @@ async function handleOpenExtensionFolder(): Promise<void> {
               @click="goToExtensionPage"
             />
             <UButton
-              v-if="isElectron"
-              label="Ordner öffnen"
-              icon="i-lucide-folder-open"
+              label="Releases öffnen"
+              icon="i-lucide-download"
               color="neutral"
               variant="outline"
-              @click="handleOpenExtensionFolder"
+              @click="openGitHubReleases"
             />
           </template>
         </div>

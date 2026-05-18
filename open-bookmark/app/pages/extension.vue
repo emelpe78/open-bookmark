@@ -16,8 +16,7 @@ const baseUrl = computed(
 );
 const copyUrl = DESKTOP_LOCALHOST_URL;
 
-const toast = useToast();
-const { isElectron, openExtensionFolder } = useDesktopBridge();
+const { openChromeExtensions, openGitHubReleases } = useDesktopBridge();
 
 type ConnectionState = "loading" | "ok" | "error";
 
@@ -45,17 +44,6 @@ async function copyBaseUrl(): Promise<void> {
   setTimeout(() => {
     copyDone.value = false;
   }, 2000);
-}
-
-async function handleOpenExtensionFolder(): Promise<void> {
-  const result = await openExtensionFolder();
-  if (!result.ok) {
-    toast.add({
-      title: "Ordner öffnen fehlgeschlagen",
-      description: result.message,
-      color: "error",
-    });
-  }
 }
 
 onMounted(() => {
@@ -144,10 +132,16 @@ onMounted(() => {
 
       <div class="mt-4 flex flex-wrap gap-2">
         <UButton
-          v-if="isElectron"
-          label="Extension-Ordner öffnen"
-          icon="i-lucide-folder-open"
-          @click="handleOpenExtensionFolder"
+          label="GitHub Releases öffnen"
+          icon="i-lucide-download"
+          @click="openGitHubReleases"
+        />
+        <UButton
+          label="Chrome-Erweiterungen öffnen"
+          color="neutral"
+          variant="outline"
+          icon="i-lucide-puzzle"
+          @click="openChromeExtensions"
         />
       </div>
     </UCard>

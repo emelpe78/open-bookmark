@@ -1,4 +1,5 @@
 import type { OpenBookmarkDesktopApi } from "~/types/desktop";
+import { GITHUB_RELEASES_URL } from "#shared/constants/releases";
 
 export type OpenExtensionFolderResult =
   | { ok: true }
@@ -74,10 +75,22 @@ export function useDesktopBridge() {
     }
   }
 
+  async function openGitHubReleases(): Promise<void> {
+    const desktop = api.value;
+    if (desktop) {
+      await desktop.openExternal(GITHUB_RELEASES_URL);
+      return;
+    }
+    if (import.meta.client) {
+      window.open(GITHUB_RELEASES_URL, "_blank", "noopener,noreferrer");
+    }
+  }
+
   return {
     api,
     isElectron,
     openExtensionFolder,
     openChromeExtensions,
+    openGitHubReleases,
   };
 }
