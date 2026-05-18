@@ -2,6 +2,29 @@
   "name": "open-bookmark",
   "version": "1.0.0",
   "private": true,
+  "description": "Local-first Bookmark-Manager — Nuxt-4-Oberfläche und Nitro-API mit SQLite",
+  "author": "Marc Lettau-Poelchen (https://github.com/emelpe78)",
+  "license": "MIT",
+  "homepage": "https://github.com/emelpe78/open-bookmark#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emelpe78/open-bookmark.git",
+    "directory": "open-bookmark"
+  },
+  "bugs": {
+    "url": "https://github.com/emelpe78/open-bookmark/issues"
+  },
+  "keywords": [
+    "bookmarks",
+    "local-first",
+    "nuxt",
+    "nitro",
+    "sqlite",
+    "markdown"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "scripts": {
     "build": "nuxt build",

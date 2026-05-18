@@ -2,6 +2,27 @@
   "name": "open-bookmark-extension",
   "private": true,
   "version": "1.0.0",
+  "description": "Chrome-Extension (MV3) zum Speichern von Seiten in der lokalen Open-Bookmark-Instanz",
+  "author": "Marc Lettau-Poelchen (https://github.com/emelpe78)",
+  "license": "MIT",
+  "homepage": "https://github.com/emelpe78/open-bookmark/tree/main/extension#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emelpe78/open-bookmark.git",
+    "directory": "extension"
+  },
+  "bugs": {
+    "url": "https://github.com/emelpe78/open-bookmark/issues"
+  },
+  "keywords": [
+    "chrome-extension",
+    "bookmarks",
+    "manifest-v3",
+    "open-bookmark"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "scripts": {
     "icons": "bash scripts/generate-icons.sh",
