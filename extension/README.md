@@ -55,7 +55,7 @@ Nach **Speichern** der Server-URL: automatischer Verbindungstest (`GET /api/tags
 ## Icons
 
 ```bash
-npm run icons   # erzeugt public/icons/* aus open-bookmark/public/favicon.ico
+npm run icons   # erzeugt public/icons/* aus desktop/resources/icon.png (oder eigenes PNG als Argument)
 ```
 
 `npm run build` führt `icons` automatisch aus (`prebuild`).

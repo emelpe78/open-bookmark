@@ -53,7 +53,25 @@ Die App startet den Dienst auf **`http://127.0.0.1:3777`** und speichert die Dat
 
 **Gatekeeper:** Unsigned Builds musst du unter *Systemeinstellungen → Datenschutz & Sicherheit* einmal erlauben.
 
+### Release-Builds (Developer)
+
+Offizielle Artefakte stehen auf [GitHub Releases](https://github.com/open-bookmark/open-bookmark/releases) (unsigned DMG, Extension-Zip). Lokaler Build:
+
+```bash
+cd desktop && npm run build:runtime && npm run pack
+```
+
+Diese Builds sind **Developer Builds** ohne Apple-Code-Signing. Notarisierung ist für eine spätere Version geplant. Nach dem Download: Rechtsklick → Öffnen, oder unter *Datenschutz & Sicherheit* erlauben.
+
 Details: [`desktop/README.md`](desktop/README.md)
+
+### Daten von anderen Tools übernehmen
+
+| Quelle | Weg in Open Bookmark |
+|--------|----------------------|
+| Chrome / Edge | Lesezeichen verwalten → Exportieren → **Einstellungen → HTML importieren** |
+| Open Bookmark (andere Instanz) | **SQL-Backup** exportieren → **SQL importieren** (ersetzt die Zieldatenbank) |
+| URL-Liste | Lesezeichen hinzufügen → Tab **Liste** (kommagetrennte URLs) |
 
 ## Lokal entwickeln (Web)
 
@@ -116,6 +134,7 @@ HTTP-JSON-API der Nuxt/Nitro-Runtime. Basis-URL in Dev und Desktop:
 | `GET` | `/api/bookmarks` | Bookmarks listen (Suche, Pagination, Filter) |
 | `GET` | `/api/bookmarks/revision` | Aggregat für Cache/Invalidierung |
 | `POST` | `/api/bookmarks` | Bookmark anlegen (einzeln oder Bulk) |
+| `POST` | `/api/bookmarks/import-html` | Lesezeichen aus `bookmarks.html` importieren |
 | `PATCH` | `/api/bookmarks/:id` | Bookmark bearbeiten |
 | `DELETE` | `/api/bookmarks/:id` | Bookmark löschen |
 | `POST` | `/api/bookmarks/:id/refresh` | Metadaten der Seite neu laden |
@@ -283,6 +302,24 @@ Legt einen oder mehrere Bookmarks an. Beim Anlegen werden **Metadaten** der Ziel
 - **failed:** URL ungültig oder anderer Fehler pro Eintrag  
 
 Bulk legt **keine** Tags/Notizen pro URL an.
+
+---
+
+#### `POST /api/bookmarks/import-html`
+
+Importiert URLs aus einer Chrome/Netscape-`bookmarks.html`. Duplikate werden übersprungen; Metadaten werden pro URL geladen.
+
+**Body**
+
+```json
+{ "html": "<!DOCTYPE NETSCAPE-Bookmark-file-1>..." }
+```
+
+Max. 10 MB. Nur `http:`/`https:`-Links werden berücksichtigt.
+
+**Antwort** `200` — wie Bulk-Import (`created`, `skipped`, `failed`).
+
+**Fehler:** `400` bei leerem HTML, fehlenden Links oder zu großer Datei.
 
 ---
 

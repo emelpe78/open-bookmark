@@ -48,5 +48,3 @@ CONTEXT.md
 .agents/
 .out-of-scope/
 .scratch/
-scripts/
-!desktop/scripts/

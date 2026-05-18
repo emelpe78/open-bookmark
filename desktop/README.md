@@ -29,7 +29,7 @@ npm run pack:dir        # nur .app (schneller zum Testen)
 
 ## App-Icon
 
-Quelle: [`../docs/favicon.png`](../docs/favicon.png). Erzeugen:
+Quelle: lokal [`../docs/favicon.png`](../docs/favicon.png) (gitignored) oder die committed `resources/icon.png`. Erzeugen:
 
 ```bash
 npm run icons   # → resources/icon.png, resources/icon.icns
@@ -66,16 +66,24 @@ npm run icons   # → resources/icon.png, resources/icon.icns
 5. Port-Konflikt: zweite Instanz / `npm run dev` → verständliche Fehlermeldung
 6. Optional: Signierung + Notarisierung (`CSC_LINK`, `APPLE_ID`, `mac.notarize` in electron-builder)
 
-## Signierung (optional)
+## Release-Builds (Developer)
 
-Für Verteilung außerhalb des Teams: Apple Developer ID, `CSC_LINK` / `APPLE_ID` für `electron-builder` Notarisierung. Ohne Zertifikat: lokaler Test mit `pack:dir` und Gatekeeper-Ausnahme.
+Version **1.0.0** und folgende Releases werden als **unsigned Developer Builds** verteilt (GitHub Releases oder lokales `npm run pack`). Nutzer müssen Gatekeeper einmal bestätigen (*Systemeinstellungen → Datenschutz & Sicherheit*).
+
+Code-Signing und Notarisierung (Apple Developer ID, `CSC_LINK`, `APPLE_ID`) sind bewusst **nach 1.0.0** geplant — siehe [CHANGELOG.md](../CHANGELOG.md).
+
+## Signierung (geplant)
+
+Für breitere Verteilung: Apple Developer ID und `electron-builder`-Notarisierung konfigurieren. Bis dahin: `pack:dir` / Release-DMG mit Gatekeeper-Ausnahme.
 
 ## Datenbank & Backup
 
 - **Eine produktive Datenbank:** Die Desktop-App nutzt ausschließlich `~/Library/Application Support/Open Bookmark/bookmarks.db` (oder einen per Einstellungen gewählten Pfad in `preferences.json`). `npm run dev` im Ordner `open-bookmark/` verwendet **immer** `./data/bookmarks.db` — getrennt von der Desktop-DB.
 - **Nicht gleichzeitig:** `npm run dev` und die Desktop-App dürfen Port 3777 nicht teilen. Läuft der Dev-Server, schlägt der Desktop-Start mit einer klaren Meldung fehl.
 - **Speicherort ändern:** Nur in der Desktop-App (Einstellungen → Allgemein → „Pfad ändern“). Ordnerdialog, Kopie inkl. WAL/SHM, Nitro-Neustart, Pfad in `preferences.json`.
-- **Backup:** SQL-Datei über `GET /api/database/backup`. Restore in der UI nicht enthalten.
+- **Backup:** SQL-Datei über `GET /api/database/backup`.
+- **SQL-Import:** Ersetzt die gesamte Datenbank (Einstellungen oder `POST /api/database/import`).
+- **HTML-Import:** Chrome-`bookmarks.html` unter Einstellungen → Datenbank (fügt URLs hinzu, `POST /api/bookmarks/import-html`).
 - **Rollback:** `preferences.json` im App-Datenordner anpassen oder löschen.
 
 ## Fehlerbehebung

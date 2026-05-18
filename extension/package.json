@@ -1,7 +1,7 @@
 {
   "name": "open-bookmark-extension",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "icons": "bash scripts/generate-icons.sh",
@@ -15,6 +15,7 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.31",
     "@types/chrome": "^0.0.320",
+    "sharp": "^0.34.2",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
     "vitest": "^3.2.4"

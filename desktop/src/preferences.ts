@@ -1,6 +1,9 @@
 import { app } from "electron";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { isValidDatabasePath } from "./preferencesValidation.js";
+
+export { isValidDatabasePath } from "./preferencesValidation.js";
 
 export interface DesktopPreferences {
   databasePath?: string;
@@ -8,10 +11,6 @@ export interface DesktopPreferences {
 
 function preferencesPath(): string {
   return path.join(app.getPath("userData"), "preferences.json");
-}
-
-function isValidDatabasePath(value: string): boolean {
-  return path.isAbsolute(value) && value.endsWith(".db");
 }
 
 export function loadPreferences(): DesktopPreferences {

@@ -27,22 +27,7 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      let created = 0;
-      let skipped = 0;
-      const failed: Array<{ url: string; reason: string }> = [];
-
-      for (const entry of urlList) {
-        const result = await service.createFromUrl(entry);
-        if (result === "created") {
-          created++;
-        } else if (result === "skipped") {
-          skipped++;
-        } else {
-          failed.push({ url: entry, reason: result.failed });
-        }
-      }
-
-      return { created, skipped, failed };
+      return service.importFromUrls(urlList);
     }
 
     if (!url?.trim()) {

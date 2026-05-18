@@ -94,7 +94,7 @@ cd extension && npm run test && npm run typecheck
 
 Tabellen: `bookmarks`, `tags`, `bookmark_tags`, `lists`, `list_bookmarks`. Duplikate über `normalized_url`. Leere Notizen als `null`.
 
-**Admin-API:** `GET /api/database`, `GET /api/database/backup` (SQL-Dump), `POST /api/database/import` (überschreibt DB). Utils: `databaseInfo.ts`, `databaseDump.ts`, `databaseImport.ts`; CLI `open-bookmark/scripts/import-database.mjs`. Desktop-Import: IPC `desktop:importDatabase` (Runtime stoppen → Child-`node` mit Nitro-Node-Binary → Neustart; **nicht** `better-sqlite3` im Electron-Prozess).
+**Admin-API:** `GET /api/database`, `GET /api/database/backup` (SQL-Dump), `POST /api/database/import` (überschreibt DB). **HTML-Import:** `POST /api/bookmarks/import-html`, Parser `shared/lib/parseBookmarkExportHtml.ts`. Utils: `databaseInfo.ts`, `databaseDump.ts`, `databaseImport.ts`; CLI `open-bookmark/scripts/import-database.mjs`. Desktop-Import: IPC `desktop:importDatabase` (Runtime stoppen → Child-`node` mit Nitro-Node-Binary → Neustart; **nicht** `better-sqlite3` im Electron-Prozess).
 
 ## API
 
@@ -105,6 +105,7 @@ Vollständige Spezifikation: [`README.md` § API](README.md#api). Kurzüberblick
 | GET | `/api/bookmarks` | Duplikat-Suche, Listen |
 | GET | `/api/bookmarks/revision` | — (Web: Auto-Sync) |
 | POST | `/api/bookmarks` | Speichern (einzeln) |
+| POST | `/api/bookmarks/import-html` | HTML-Export importieren |
 | PATCH | `/api/bookmarks/:id` | Tags/Notizen |
 | DELETE | `/api/bookmarks/:id` | — |
 | POST | `/api/bookmarks/:id/refresh` | Metadaten neu laden |
