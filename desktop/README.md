@@ -23,7 +23,7 @@ npm run dev
 
 ```bash
 npm run build:runtime   # open-bookmark + extension + Node-Binary
-npm run pack            # .app + .dmg unter release/
+npm run pack            # .app (dir) → ad-hoc sign → .dmg unter release/
 npm run pack:dir        # nur .app (schneller zum Testen)
 ```
 
@@ -68,7 +68,7 @@ npm run icons   # → resources/icon.png, resources/icon.icns
 
 ## Release-Builds (Developer)
 
-Version **1.0.0** und folgende Releases werden als **unsigned Developer Builds** verteilt (GitHub Releases oder lokales `npm run pack`). Nutzer müssen Gatekeeper einmal bestätigen (*Systemeinstellungen → Datenschutz & Sicherheit*).
+Version **1.0.0** und folgende Releases werden als **Developer Builds** verteilt (`npm run pack` = ad-hoc signiertes DMG). Nach dem Browser-Download kann macOS fälschlich „ist beschädigt“ anzeigen — dann `xattr -cr "/Applications/Open Bookmark.app"` oder Rechtsklick → **Öffnen** (siehe [README.md](../README.md#open-bookmark-desktop-macos)).
 
 Code-Signing und Notarisierung (Apple Developer ID, `CSC_LINK`, `APPLE_ID`) sind bewusst **nach 1.0.0** geplant — siehe [CHANGELOG.md](../CHANGELOG.md).
 

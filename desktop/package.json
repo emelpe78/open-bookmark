@@ -15,8 +15,9 @@
     "prepare-node": "bash scripts/prepare-node.sh",
     "build:runtime": "bash scripts/build-runtime.sh",
     "prepack": "npm run icons",
-    "pack": "npm run build:runtime && npm run build && electron-builder --mac",
+    "pack": "npm run pack:release",
     "pack:dir": "npm run build:runtime && npm run build && electron-builder --mac dir",
+    "pack:release": "npm run build:runtime && npm run build && electron-builder --mac dir && bash scripts/codesign-mac-app.sh && electron-builder --mac dmg --prepackaged \"release/mac-arm64/Open Bookmark.app\"",
     "postinstall": "npm run icons && bash scripts/patch-electron-mac.sh"
   },
   "devDependencies": {
@@ -68,8 +69,8 @@
     "mac": {
       "icon": "icon.icns",
       "identity": null,
+      "gatekeeperAssess": false,
       "target": [
-        "dmg",
         "dir"
       ],
       "category": "public.app-category.productivity",

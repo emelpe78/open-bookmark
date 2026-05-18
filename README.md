@@ -51,7 +51,13 @@ cd desktop && npm install && npm run dev
 Die App startet den Dienst auf **`http://127.0.0.1:3777`** und speichert die Datenbank unter  
 `~/Library/Application Support/Open Bookmark/bookmarks.db`.
 
-**Gatekeeper:** Unsigned Builds musst du unter *Systemeinstellungen → Datenschutz & Sicherheit* einmal erlauben.
+**Gatekeeper:** Release-Builds sind ad-hoc signiert, aber nicht notarisiert. Nach dem Download zeigt macOS manchmal fälschlich „ist beschädigt“ (Quarantäne durch den Browser). Dann im Terminal:
+
+```bash
+xattr -cr "/Applications/Open Bookmark.app"
+```
+
+Alternativ: Rechtsklick auf die App → **Öffnen**, oder unter *Systemeinstellungen → Datenschutz & Sicherheit* einmal erlauben.
 
 ### Release-Builds (Developer)
 
