@@ -4,6 +4,25 @@ Lokal betriebene Lesezeichen-App mit automatischer Metadaten-Extraktion, Tags, M
 
 Technologie: **Nuxt 4**, **Nuxt UI**, **SQLite** (`better-sqlite3`), **Electron** (macOS Desktop). Die Web-App liegt im Ordner [`open-bookmark/`](open-bookmark/).
 
+## Inhalt
+
+- [Voraussetzungen](#voraussetzungen)
+- [Open Bookmark Desktop (macOS)](#open-bookmark-desktop-macos)
+- [Lokal entwickeln (Web)](#lokal-entwickeln-web)
+  - [Typecheck](#typecheck)
+- [Umgebungsvariablen](#umgebungsvariablen)
+- [API](#api)
+  - [Übersicht](#übersicht)
+  - [Fehlerantworten](#fehlerantworten)
+  - [Datenmodelle](#datenmodelle)
+  - [Bookmarks](#bookmarks)
+  - [Tags](#tags)
+  - [Listen](#listen)
+  - [Beispiel (curl)](#beispiel-bookmark-speichern-extension--curl)
+- [Chrome Extension](#chrome-extension)
+- [Repository-Struktur](#repository-struktur)
+- [Tests](#tests)
+
 ## Voraussetzungen
 
 - Node.js 22+
