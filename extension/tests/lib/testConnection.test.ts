@@ -28,7 +28,7 @@ describe("testConnection", () => {
     vi.mocked(listTags).mockRejectedValue(
       new OpenBookmarkApiError(
         "network",
-        "OpenBookmark ist unter der konfigurierten URL nicht erreichbar.",
+        "Open Bookmark ist unter der konfigurierten URL nicht erreichbar.",
       ),
     );
 

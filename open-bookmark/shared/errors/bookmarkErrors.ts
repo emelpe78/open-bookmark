@@ -4,6 +4,8 @@ export const BOOKMARK_ERROR_CODES = [
   "INVALID_URL",
   "LOAD_FAILED",
   "EMPTY_TAG_NAME",
+  "TAG_NOT_FOUND",
+  "DUPLICATE_TAG_NAME",
 ] as const;
 
 export type BookmarkErrorCode = (typeof BOOKMARK_ERROR_CODES)[number];
@@ -14,6 +16,8 @@ export const BOOKMARK_ERROR_MESSAGES: Record<BookmarkErrorCode, string> = {
   INVALID_URL: "Ungültige URL.",
   LOAD_FAILED: "Bookmark konnte nicht geladen werden.",
   EMPTY_TAG_NAME: "Tag-Name darf nicht leer sein.",
+  TAG_NOT_FOUND: "Tag nicht gefunden.",
+  DUPLICATE_TAG_NAME: "Ein Tag mit diesem Namen existiert bereits.",
 };
 
 export class BookmarkDomainError extends Error {

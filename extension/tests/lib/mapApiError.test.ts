@@ -17,7 +17,7 @@ describe("mapApiErrorToUserMessage", () => {
         new OpenBookmarkApiError("network", "Failed to fetch"),
       ),
     ).toBe(
-      "OpenBookmark ist unter der konfigurierten URL nicht erreichbar.",
+      "Open Bookmark ist unter der konfigurierten URL nicht erreichbar.",
     );
   });
 

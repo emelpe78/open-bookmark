@@ -41,4 +41,8 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2026-05-01",
+
+  routeRules: {
+    "/": { redirect: "/bookmarks" },
+  },
 });

@@ -4,6 +4,10 @@ import {
   DESKTOP_LOCALHOST_URL,
 } from "#shared/constants/desktop";
 
+useHead({
+  title: "Extension – Open Bookmark",
+});
+
 const config = useRuntimeConfig();
 const baseUrl = computed(
   () => config.public.appPort
@@ -12,6 +16,7 @@ const baseUrl = computed(
 );
 const copyUrl = DESKTOP_LOCALHOST_URL;
 
+const toast = useToast();
 const { isElectron, openExtensionFolder } = useDesktopBridge();
 
 type ConnectionState = "loading" | "ok" | "error";
@@ -24,15 +29,13 @@ async function refreshConnection(): Promise<void> {
   connectionState.value = "loading";
   connectionMessage.value = "";
   try {
-    const tags = await $fetch<Array<{ name: string }>>("/api/tags");
-    const count = tags.length;
-    const label = count === 1 ? "Tag" : "Tags";
+    await $fetch("/api/tags");
     connectionState.value = "ok";
-    connectionMessage.value = `Lokaler Dienst erreichbar (${count} ${label}).`;
+    connectionMessage.value = "Lokaler Dienst erreichbar.";
   } catch {
     connectionState.value = "error";
     connectionMessage.value =
-      "Der lokale Dienst ist nicht erreichbar. Starte OpenBookmark Desktop oder prüfe Port 3777.";
+      "Der lokale Dienst ist nicht erreichbar. Starte Open Bookmark Desktop oder prüfe Port 3777.";
   }
 }
 
@@ -42,6 +45,17 @@ async function copyBaseUrl(): Promise<void> {
   setTimeout(() => {
     copyDone.value = false;
   }, 2000);
+}
+
+async function handleOpenExtensionFolder(): Promise<void> {
+  const result = await openExtensionFolder();
+  if (!result.ok) {
+    toast.add({
+      title: "Ordner öffnen fehlgeschlagen",
+      description: result.message,
+      color: "error",
+    });
+  }
 }
 
 onMounted(() => {
@@ -56,7 +70,7 @@ onMounted(() => {
         Browser-Erweiterung
       </h1>
       <p class="mt-1 text-sm text-muted">
-        Speichere Seiten direkt aus Chrome oder Chromium in OpenBookmark.
+        Speichere Seiten direkt aus Chrome oder Chromium in Open Bookmark.
       </p>
     </div>
 
@@ -126,34 +140,16 @@ onMounted(() => {
         </div>
       </template>
 
-      <ol class="list-decimal space-y-2 pl-5 text-sm text-muted">
-        <li>Extension bauen: <code class="text-default">cd extension && npm run build</code></li>
-        <li>Chrome öffnen: <code class="text-default">chrome://extensions</code></li>
-        <li><strong>Entwicklermodus</strong> aktivieren</li>
-        <li><strong>Entpackte Erweiterung laden</strong> → Ordner <code class="text-default">extension/dist</code></li>
-        <li>In den Extension-Einstellungen die Basis-URL <code class="text-default">{{ copyUrl }}</code> eintragen</li>
-        <li>Host-Zugriff bestätigen, wenn Chrome danach fragt</li>
-      </ol>
+      <ExtensionInstallSteps />
 
       <div class="mt-4 flex flex-wrap gap-2">
         <UButton
           v-if="isElectron"
           label="Extension-Ordner öffnen"
           icon="i-lucide-folder-open"
-          @click="() => void openExtensionFolder()"
-        />
-        <UButton
-          label="Zur Startseite"
-          color="neutral"
-          variant="outline"
-          to="/"
+          @click="handleOpenExtensionFolder"
         />
       </div>
-
-      <p v-if="!isElectron" class="mt-3 text-xs text-muted">
-        Im Browser-Dev-Modus liegt der Ordner im Repository unter
-        <code class="text-default">extension/dist</code>.
-      </p>
     </UCard>
   </section>
 </template>

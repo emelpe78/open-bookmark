@@ -37,3 +37,9 @@ export const updateBookmarkBodySchema = z.object({
 export const bookmarkIdParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
+
+export const tagIdParamSchema = bookmarkIdParamSchema;
+
+export const tagBodySchema = z.object({
+  name: z.string().trim().min(1, "Tag-Name ist erforderlich."),
+});

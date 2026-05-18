@@ -1,4 +1,4 @@
-# Open-Bookmark
+# Open Bookmark
 
 Lokal betriebene Lesezeichen-App mit automatischer Metadaten-Extraktion, Tags, Markdown-Notizen und Kartenansicht.
 
@@ -10,7 +10,7 @@ Technologie: **Nuxt 4**, **Nuxt UI**, **SQLite** (`better-sqlite3`), **Electron*
 - npm
 - macOS (für die Desktop-App)
 
-## OpenBookmark Desktop (macOS)
+## Open Bookmark Desktop (macOS)
 
 Installierbare App ohne Docker:
 
@@ -18,7 +18,7 @@ Installierbare App ohne Docker:
 cd desktop
 npm install
 npm run build:runtime   # baut Nuxt + Extension + Node-Bundle
-npm run pack:dir        # erzeugt release/mac-arm64/OpenBookmark.app (unsigned)
+npm run pack:dir        # erzeugt release/mac-arm64/Open Bookmark.app (unsigned)
 ```
 
 Entwicklung (Electron lädt die lokale Nitro-Runtime):
@@ -29,7 +29,7 @@ cd desktop && npm install && npm run dev
 ```
 
 Die App startet den Dienst auf **`http://127.0.0.1:3777`** und speichert die Datenbank unter  
-`~/Library/Application Support/OpenBookmark/bookmarks.db`.
+`~/Library/Application Support/Open Bookmark/bookmarks.db`.
 
 **Gatekeeper:** Unsigned Builds musst du unter *Systemeinstellungen → Datenschutz & Sicherheit* einmal erlauben.
 

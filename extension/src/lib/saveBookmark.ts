@@ -48,7 +48,7 @@ export async function saveOrUpdateBookmark(
       if (!hasBookmarkFormChanges(existing, tagsInput, notesInput)) {
         throw new OpenBookmarkApiError(
           "duplicate",
-          "Diese Seite ist bereits in OpenBookmark gespeichert.",
+          "Diese Seite ist bereits in Open Bookmark gespeichert.",
           409,
         );
       }

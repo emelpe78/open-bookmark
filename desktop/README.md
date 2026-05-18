@@ -1,4 +1,4 @@
-# OpenBookmark Desktop (Electron)
+# Open Bookmark Desktop (Electron)
 
 Native macOS-Hülle für die Nuxt-/Nitro-App. Beim Start wird die Production-Runtime als **Child Process** auf `127.0.0.1:3777` gestartet; das Fenster lädt dieselbe URL.
 
@@ -50,9 +50,9 @@ npm run icons   # → resources/icon.png, resources/icon.icns
 | Main | `src/main.ts` — Fenster, IPC, Lifecycle |
 | Preload | `src/preload.ts` — `window.openBookmarkDesktop` |
 | Runtime | `../open-bookmark/.output/server/index.mjs` |
-| Datenbank | `~/Library/Application Support/OpenBookmark/bookmarks.db` |
+| Datenbank | `~/Library/Application Support/Open Bookmark/bookmarks.db` |
 | Extension (Side-Load) | `../extension/dist` (Dev) bzw. `Resources/extension-dist` (Packaged) |
-| Logs | `~/Library/Application Support/OpenBookmark/logs/runtime.log` |
+| Logs | `~/Library/Application Support/Open Bookmark/logs/runtime.log` |
 
 ## Release-Checkliste (intern)
 
@@ -71,4 +71,4 @@ Für Verteilung außerhalb des Teams: Apple Developer ID, `CSC_LINK` / `APPLE_ID
 
 - **Port 3777 belegt:** anderen Dev-Server oder zweite Instanz beenden.
 - **Nitro-Build fehlt:** `cd open-bookmark && npm run build`.
-- **Runtime-Log:** Application Support → OpenBookmark → `logs/runtime.log`.
+- **Runtime-Log:** Application Support → Open Bookmark → `logs/runtime.log`.

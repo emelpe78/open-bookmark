@@ -29,6 +29,10 @@ export interface TagsResponse {
   tags: TagWithCount[];
 }
 
+export interface TagMutationResponse {
+  tag: TagWithCount;
+}
+
 export interface BulkImportResult {
   created: number;
   skipped: number;

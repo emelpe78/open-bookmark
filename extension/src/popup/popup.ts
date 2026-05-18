@@ -4,19 +4,18 @@ import { findBookmarkByUrl } from "../lib/findBookmarkByUrl";
 import { mapApiErrorToUserMessage } from "../lib/mapApiError";
 import { refreshBookmark } from "../lib/openBookmarkApi";
 import { saveOrUpdateBookmark } from "../lib/saveBookmark";
-import { loadTagSuggestions, refreshTagCache } from "../lib/tagSuggestions";
-import {
-  getLastFormInputs,
-  setLastFormInputs,
-} from "../lib/userPreferences";
+import { attachTagAutocomplete } from "../lib/tagAutocomplete";
+import { refreshTagCache } from "../lib/tagSuggestions";
 import { OpenBookmarkApiError } from "../lib/types";
 
 const pageTitleEl = document.getElementById("page-title")!;
 const pageUrlEl = document.getElementById("page-url")!;
 const tagsEl = document.getElementById("tags") as HTMLInputElement;
-const tagSuggestionsEl = document.getElementById(
-  "tag-suggestions",
-) as HTMLDataListElement;
+const tagSuggestionsListEl = document.getElementById(
+  "tag-suggestions-list",
+) as HTMLUListElement;
+
+const tagAutocomplete = attachTagAutocomplete(tagsEl, tagSuggestionsListEl);
 const notesEl = document.getElementById("notes") as HTMLTextAreaElement;
 const saveBtn = document.getElementById("save-btn") as HTMLButtonElement;
 const statusEl = document.getElementById("status")!;
@@ -120,16 +119,11 @@ async function loadActiveTab() {
   pageUrlEl.textContent = url || "Keine URL für diesen Tab verfügbar.";
   saveBtn.disabled = !url;
 
+  tagsEl.value = "";
+  notesEl.value = "";
+
   if (url) {
     await loadExistingBookmarkForm(url);
-  }
-}
-
-async function initForm() {
-  const last = await getLastFormInputs();
-  if (!tagsEl.value && !notesEl.value) {
-    tagsEl.value = last.tags;
-    notesEl.value = last.notes;
   }
 }
 
@@ -159,12 +153,9 @@ saveBtn.addEventListener("click", async () => {
       ? `Bookmark aktualisiert.${tagHint}`
       : `Bookmark gespeichert.${tagHint}`;
     setStatus(message, "success");
-    await setLastFormInputs({
-      tags: tagsEl.value,
-      notes: notesEl.value,
-    });
     const baseUrl = await getServerBaseUrl();
-    void refreshTagCache(baseUrl);
+    await refreshTagCache(baseUrl);
+    await tagAutocomplete.reload();
   } catch (error) {
     if (error instanceof OpenBookmarkApiError && error.kind === "duplicate") {
       await handleDuplicate(url);
@@ -220,7 +211,4 @@ openAppBtn.addEventListener("click", () => {
   void openApp();
 });
 
-void (async () => {
-  await initForm();
-  await Promise.all([loadActiveTab(), loadTagSuggestions(tagSuggestionsEl)]);
-})();
+void loadActiveTab();

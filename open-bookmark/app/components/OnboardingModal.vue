@@ -7,18 +7,19 @@ import {
 const open = defineModel<boolean>("open", { default: false });
 
 const step = ref(0);
-const { openExtensionFolder } = useDesktopBridge();
+const toast = useToast();
+const { isElectron, openExtensionFolder } = useDesktopBridge();
 
 const steps = [
   {
-    title: "Willkommen bei OpenBookmark",
+    title: "Willkommen bei Open Bookmark",
     description:
       "Deine Lesezeichen bleiben lokal auf dem Mac — ohne Cloud und ohne Docker.",
   },
   {
     title: "Lokal als Desktop-App",
     description:
-      "OpenBookmark startet den Dienst automatisch im Hintergrund. Die API läuft nur auf deinem Rechner.",
+      "Open Bookmark startet den Dienst automatisch im Hintergrund. Die API läuft nur auf deinem Rechner.",
   },
   {
     title: "Basis-URL für die Extension",
@@ -31,6 +32,8 @@ const steps = [
   },
 ];
 
+const isLastStep = computed(() => step.value === steps.length - 1);
+
 function finish() {
   if (import.meta.client) {
     localStorage.setItem("onboardingComplete", "1");
@@ -42,10 +45,26 @@ function goToExtensionPage() {
   finish();
   navigateTo("/extension");
 }
+
+async function handleOpenExtensionFolder(): Promise<void> {
+  const result = await openExtensionFolder();
+  if (!result.ok) {
+    toast.add({
+      title: "Ordner öffnen fehlgeschlagen",
+      description: result.message,
+      color: "error",
+    });
+  }
+}
 </script>
 
 <template>
-  <UModal v-model:open="open" :ui="{ content: 'max-w-lg' }">
+  <UModal
+    v-model:open="open"
+    :dismissible="false"
+    :close="false"
+    :ui="{ content: 'max-w-lg' }"
+  >
     <template #content>
       <div class="space-y-4 p-6">
         <div class="flex items-center gap-2">
@@ -58,14 +77,7 @@ function goToExtensionPage() {
           {{ steps[step]?.description }}
         </p>
 
-        <ol
-          v-if="step === steps.length - 1"
-          class="list-decimal space-y-1 pl-5 text-sm text-muted"
-        >
-          <li>Chrome öffnen → <code class="text-default">chrome://extensions</code></li>
-          <li>Entwicklermodus aktivieren</li>
-          <li>„Entpackte Erweiterung laden“ → Ordner <code class="text-default">extension/dist</code></li>
-        </ol>
+        <ExtensionInstallSteps v-if="isLastStep" />
 
         <div class="flex flex-wrap gap-2 pt-2">
           <UButton
@@ -76,30 +88,25 @@ function goToExtensionPage() {
             @click="step -= 1"
           />
           <UButton
-            v-if="step < steps.length - 1"
+            v-if="!isLastStep"
             label="Weiter"
             @click="step += 1"
           />
-          <UButton
-            v-if="step === steps.length - 1"
-            label="Extension einrichten"
-            icon="i-lucide-puzzle"
-            @click="goToExtensionPage"
-          />
-          <UButton
-            label="Ohne Extension fortfahren"
-            color="neutral"
-            variant="ghost"
-            @click="finish"
-          />
-          <UButton
-            v-if="step === steps.length - 1"
-            label="Ordner öffnen"
-            icon="i-lucide-folder-open"
-            color="neutral"
-            variant="outline"
-            @click="() => void openExtensionFolder()"
-          />
+          <template v-if="isLastStep">
+            <UButton
+              label="Extension einrichten"
+              icon="i-lucide-puzzle"
+              @click="goToExtensionPage"
+            />
+            <UButton
+              v-if="isElectron"
+              label="Ordner öffnen"
+              icon="i-lucide-folder-open"
+              color="neutral"
+              variant="outline"
+              @click="handleOpenExtensionFolder"
+            />
+          </template>
         </div>
       </div>
     </template>

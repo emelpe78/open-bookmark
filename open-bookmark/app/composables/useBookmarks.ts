@@ -123,6 +123,10 @@ export function useBookmarks() {
     return result.bookmark;
   }
 
+  async function refreshViews(): Promise<void> {
+    await Promise.all([refresh(), refreshTags()]);
+  }
+
   return {
     page,
     pageSize,
@@ -134,6 +138,7 @@ export function useBookmarks() {
     pending,
     error,
     refresh,
+    refreshViews,
     createBookmark,
     bulkImport,
     updateBookmark,

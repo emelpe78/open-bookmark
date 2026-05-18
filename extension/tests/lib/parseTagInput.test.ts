@@ -18,4 +18,11 @@ describe("parseTagInput", () => {
     expect(parseTagInput("")).toEqual([]);
     expect(parseTagInput(undefined)).toEqual([]);
   });
+
+  it("normalizes tag names", () => {
+    expect(parseTagInput("SEO Tips, Marc Lettau")).toEqual([
+      "seo-tips",
+      "marc-lettau",
+    ]);
+  });
 });

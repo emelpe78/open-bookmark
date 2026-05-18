@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Leitfaden für AI-Agents am Projekt **Open-Bookmark** — lokaler Bookmark-Manager (Nuxt 4, SQLite, **Electron Desktop macOS**) plus **Chrome Extension** (Manifest V3). Details: [`README.md`](README.md), Desktop: [`desktop/README.md`](desktop/README.md), Extension: [`extension/README.md`](extension/README.md).
+Leitfaden für AI-Agents am Projekt **Open Bookmark** — lokaler Bookmark-Manager (Nuxt 4, SQLite, **Electron Desktop macOS**) plus **Chrome Extension** (Manifest V3). Details: [`README.md`](README.md), Desktop: [`desktop/README.md`](desktop/README.md), Extension: [`extension/README.md`](extension/README.md).
 
 ## Produkt (MVP)
 
@@ -49,7 +49,7 @@ Leitfaden für AI-Agents am Projekt **Open-Bookmark** — lokaler Bookmark-Manag
 
 - Keine Fachlogik in Electron — nur Shell, Spawn, IPC, Packaging.
 - `HOST=127.0.0.1`, Port **3777** fix (MVP); bei `EADDRINUSE` Fehler-UI.
-- `DATABASE_PATH` = `app.getPath('userData')/bookmarks.db`, `app.setName('OpenBookmark')`.
+- `DATABASE_PATH` = `app.getPath('userData')/bookmarks.db`, `app.setName('Open Bookmark')`.
 - Renderer: `contextIsolation` + `sandbox`, kein `nodeIntegration`.
 
 ## Chrome Extension (`extension/`)

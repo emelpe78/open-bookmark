@@ -30,12 +30,12 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: MENU_SAVE_PAGE,
-      title: "Aktuelle Seite in OpenBookmark speichern",
+      title: "Aktuelle Seite in Open Bookmark speichern",
       contexts: ["page"],
     });
     chrome.contextMenus.create({
       id: MENU_SAVE_LINK,
-      title: "Link in OpenBookmark speichern",
+      title: "Link in Open Bookmark speichern",
       contexts: ["link"],
     });
   });

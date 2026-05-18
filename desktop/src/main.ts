@@ -4,6 +4,7 @@ import {
   ipcMain,
   shell,
 } from "electron";
+import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { APP_DISPLAY_NAME, configureAppBranding } from "./appMetadata.js";
@@ -55,7 +56,7 @@ async function createMainWindow(): Promise<void> {
     mainWindow?.show();
   });
 
-  await mainWindow.loadURL(BASE_URL);
+  await mainWindow.loadURL(`${BASE_URL}/bookmarks`);
 }
 
 function showErrorWindow(message: string): void {
@@ -102,9 +103,23 @@ function registerIpcHandlers(): void {
     shell.showItemInFolder(targetPath);
   });
 
-  ipcMain.handle("desktop:openExtensionFolder", () => {
+  ipcMain.handle("desktop:openExtensionFolder", async () => {
     const paths = getRuntimePaths() ?? resolveRuntimePaths();
-    shell.openPath(paths.extensionDistPath);
+    let target = paths.extensionDistPath;
+
+    if (!existsSync(target)) {
+      const parent = path.dirname(target);
+      if (existsSync(parent)) {
+        target = parent;
+      } else {
+        mkdirSync(target, { recursive: true });
+      }
+    }
+
+    const error = await shell.openPath(target);
+    if (error) {
+      throw new Error(error);
+    }
   });
 }
 

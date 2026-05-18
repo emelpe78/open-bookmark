@@ -3,7 +3,7 @@ import type { PageMetadata } from "#shared/types/bookmark";
 
 const FETCH_TIMEOUT_MS = 10_000;
 const USER_AGENT =
-  "Open-Bookmark/1.0 (+https://github.com/open-bookmark; local bookmark manager)";
+  "Open Bookmark/1.0 (+https://github.com/open-bookmark; local bookmark manager)";
 
 function resolveAbsoluteUrl(base: string, value: string | undefined): string | null {
   if (!value?.trim()) {

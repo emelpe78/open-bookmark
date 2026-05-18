@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "OpenBookmark",
+  "name": "Open Bookmark",
   "version": "0.1.0",
-  "description": "Speichere Webseiten mit einem Klick in deiner OpenBookmark-Instanz.",
+  "description": "Speichere Webseiten mit einem Klick in deiner Open Bookmark-Instanz.",
   "icons": {
     "16": "public/icons/icon16.png",
     "32": "public/icons/icon32.png",
@@ -11,7 +11,7 @@
   },
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "In OpenBookmark speichern"
+    "default_title": "In Open Bookmark speichern"
   },
   "options_page": "src/options/options.html",
   "background": {

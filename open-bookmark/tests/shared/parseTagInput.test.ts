@@ -17,4 +17,9 @@ describe("parseTagInput", () => {
   it("flattens array input with commas", () => {
     expect(parseTagInput(["foo, bar", "baz"])).toEqual(["foo", "bar", "baz"]);
   });
+
+  it("normalizes tag names", () => {
+    expect(parseTagInput("Nuxt, SEO Tips")).toEqual(["nuxt", "seo-tips"]);
+    expect(parseTagInput("Marc Lettau-Poelchen")).toEqual(["marc-lettau-poelchen"]);
+  });
 });

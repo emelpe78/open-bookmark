@@ -217,4 +217,25 @@ export class BookmarkService {
   listTags() {
     return this.tagRepo.listWithCounts();
   }
+
+  createTag(name: string) {
+    const tag = this.tagRepo.create(name);
+    return this.tagRepo.getWithCount(tag.id)!;
+  }
+
+  updateTag(id: number, name: string) {
+    this.tagRepo.update(id, name);
+    const tag = this.tagRepo.getWithCount(id);
+    if (!tag) {
+      throw new BookmarkDomainError("TAG_NOT_FOUND");
+    }
+    return tag;
+  }
+
+  deleteTag(id: number): void {
+    const deleted = this.tagRepo.delete(id);
+    if (!deleted) {
+      throw new BookmarkDomainError("TAG_NOT_FOUND");
+    }
+  }
 }

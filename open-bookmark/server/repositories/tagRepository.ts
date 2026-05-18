@@ -1,5 +1,6 @@
 import type Database from "better-sqlite3";
 import { BookmarkDomainError } from "#shared/errors/bookmarkErrors";
+import { normalizeTagName } from "#shared/lib/normalizeTagName";
 import { parseTagInput } from "#shared/lib/parseTagInput";
 
 export interface TagRow {
@@ -93,21 +94,89 @@ export class TagRepository {
     transaction();
   }
 
-  findOrCreateTag(name: string): TagRow {
-    const trimmed = name.trim();
-    if (!trimmed) {
+  findById(id: number): TagRow | null {
+    const row = this.db
+      .prepare("SELECT id, name FROM tags WHERE id = ?")
+      .get(id) as TagRow | undefined;
+    return row ?? null;
+  }
+
+  getWithCount(id: number): { id: number; name: string; count: number } | null {
+    const row = this.db
+      .prepare(
+        `
+        SELECT t.id, t.name, COUNT(bt.bookmark_id) AS count
+        FROM tags t
+        LEFT JOIN bookmark_tags bt ON bt.tag_id = t.id
+        WHERE t.id = ?
+        GROUP BY t.id, t.name
+      `,
+      )
+      .get(id) as { id: number; name: string; count: number } | undefined;
+    return row ?? null;
+  }
+
+  create(name: string): TagRow {
+    const normalized = normalizeTagName(name);
+    if (!normalized) {
       throw new BookmarkDomainError("EMPTY_TAG_NAME");
     }
 
     const existing = this.db
       .prepare("SELECT id, name FROM tags WHERE name = ? COLLATE NOCASE")
-      .get(trimmed) as TagRow | undefined;
+      .get(normalized) as TagRow | undefined;
+
+    if (existing) {
+      throw new BookmarkDomainError("DUPLICATE_TAG_NAME");
+    }
+
+    const insert = this.db.prepare("INSERT INTO tags (name) VALUES (?)").run(normalized);
+    return { id: Number(insert.lastInsertRowid), name: normalized };
+  }
+
+  update(id: number, name: string): TagRow {
+    const normalized = normalizeTagName(name);
+    if (!normalized) {
+      throw new BookmarkDomainError("EMPTY_TAG_NAME");
+    }
+
+    const existing = this.findById(id);
+    if (!existing) {
+      throw new BookmarkDomainError("TAG_NOT_FOUND");
+    }
+
+    const duplicate = this.db
+      .prepare("SELECT id FROM tags WHERE name = ? COLLATE NOCASE AND id != ?")
+      .get(normalized, id) as { id: number } | undefined;
+
+    if (duplicate) {
+      throw new BookmarkDomainError("DUPLICATE_TAG_NAME");
+    }
+
+    this.db.prepare("UPDATE tags SET name = ? WHERE id = ?").run(normalized, id);
+    return { id, name: normalized };
+  }
+
+  delete(id: number): boolean {
+    const result = this.db.prepare("DELETE FROM tags WHERE id = ?").run(id);
+    return result.changes > 0;
+  }
+
+  findOrCreateTag(name: string): TagRow {
+    const normalized = normalizeTagName(name);
+    if (!normalized) {
+      throw new BookmarkDomainError("EMPTY_TAG_NAME");
+    }
+
+    const existing = this.db
+      .prepare("SELECT id, name FROM tags WHERE name = ? COLLATE NOCASE")
+      .get(normalized) as TagRow | undefined;
 
     if (existing) {
       return existing;
     }
 
-    const insert = this.db.prepare("INSERT INTO tags (name) VALUES (?)").run(trimmed);
-    return { id: Number(insert.lastInsertRowid), name: trimmed };
+    const insert = this.db.prepare("INSERT INTO tags (name) VALUES (?)").run(normalized);
+    return { id: Number(insert.lastInsertRowid), name: normalized };
   }
 }

@@ -1,5 +1,9 @@
 import type { OpenBookmarkDesktopApi } from "~/types/desktop";
 
+export type OpenExtensionFolderResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
 export function useDesktopBridge() {
   const api = import.meta.client
     ? (window.openBookmarkDesktop as OpenBookmarkDesktopApi | undefined)
@@ -7,12 +11,24 @@ export function useDesktopBridge() {
 
   const isElectron = computed(() => Boolean(api));
 
-  async function openExtensionFolder(): Promise<boolean> {
+  async function openExtensionFolder(): Promise<OpenExtensionFolderResult> {
     if (!api) {
-      return false;
+      return {
+        ok: false,
+        message: "Ordner öffnen ist nur in der Desktop-App verfügbar.",
+      };
     }
-    await api.openExtensionFolder();
-    return true;
+
+    try {
+      await api.openExtensionFolder();
+      return { ok: true };
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Der Extension-Ordner konnte nicht geöffnet werden.";
+      return { ok: false, message };
+    }
   }
 
   async function openChromeExtensions(): Promise<void> {

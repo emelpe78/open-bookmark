@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OpenBookmark</title>
+    <title>Open Bookmark</title>
     <link rel="stylesheet" href="./popup.css" />
   </head>
   <body>
     <main class="popup">
       <header class="popup__header">
-        <h1 class="popup__title">OpenBookmark</h1>
+        <h1 class="popup__title">Open Bookmark</h1>
       </header>
 
       <section class="popup__page" aria-label="Aktuelle Seite">
@@ -17,19 +17,23 @@
         <p id="page-url" class="popup__page-url">…</p>
       </section>
 
-      <label class="popup__field">
+      <div class="popup__field">
         <span class="popup__label">Tags (optional)</span>
-        <input
-          id="tags"
-          class="popup__input"
-          type="text"
-          list="tag-suggestions"
-          placeholder="nuxt, docs, lesen"
-          autocomplete="off"
-        />
-        <datalist id="tag-suggestions"></datalist>
-        <span class="popup__hint">Kommagetrennt. Neue Tags werden beim Speichern angelegt.</span>
-      </label>
+        <p class="popup__description">
+          Kommagetrennt; wird als Kleinbuchstaben mit Bindestrichen gespeichert.
+        </p>
+        <div class="popup__tags-wrap">
+          <input
+            id="tags"
+            class="popup__input"
+            type="text"
+            placeholder="nuxt, open-source, lesen"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <ul id="tag-suggestions-list" class="popup__tag-suggestions" hidden></ul>
+        </div>
+      </div>
 
       <label class="popup__field">
         <span class="popup__label">Notiz (optional)</span>
@@ -58,7 +62,7 @@
         </p>
         <div class="popup__duplicate-buttons">
           <button id="duplicate-open-app" type="button" class="popup__btn popup__btn--secondary">
-            In OpenBookmark öffnen
+            In Open Bookmark öffnen
           </button>
           <button
             id="duplicate-refresh"
@@ -73,7 +77,7 @@
 
       <footer class="popup__footer">
         <button id="open-app" type="button" class="popup__link">
-          In OpenBookmark öffnen
+          In Open Bookmark öffnen
         </button>
         <button id="open-options" type="button" class="popup__link">
           Einstellungen

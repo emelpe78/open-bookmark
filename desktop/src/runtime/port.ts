@@ -8,7 +8,7 @@ export function assertPortAvailable(port = APP_PORT): Promise<void> {
       if (error.code === "EADDRINUSE") {
         reject(
           new Error(
-            `Port ${port} ist bereits belegt. Beende den anderen Prozess oder schließe eine zweite OpenBookmark-Instanz.`,
+            `Port ${port} ist bereits belegt. Beende den anderen Prozess oder schließe eine zweite Open Bookmark-Instanz.`,
           ),
         );
         return;

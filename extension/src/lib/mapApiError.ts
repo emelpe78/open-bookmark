@@ -6,11 +6,11 @@ export function mapApiErrorToUserMessage(error: unknown): string {
       case "config":
         return "Bitte prüfe die Server-Adresse in den Extension-Einstellungen.";
       case "network":
-        return "OpenBookmark ist unter der konfigurierten URL nicht erreichbar.";
+        return "Open Bookmark ist unter der konfigurierten URL nicht erreichbar.";
       case "duplicate":
         return (
           error.message ||
-          "Diese Seite ist bereits in OpenBookmark gespeichert."
+          "Diese Seite ist bereits in Open Bookmark gespeichert."
         );
       case "validation":
         return error.message || "Die Anfrage war ungültig.";

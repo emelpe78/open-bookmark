@@ -110,9 +110,60 @@ body {
   min-height: 56px;
 }
 
-.popup__hint {
+.popup__hint,
+.popup__description {
+  margin: 0;
   font-size: 11px;
   color: var(--muted);
+}
+
+.popup__tags-wrap {
+  position: relative;
+}
+
+.popup__tag-suggestions {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+}
+
+.popup__tag-suggestions[hidden] {
+  display: none;
+}
+
+.popup__tag-suggestion {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.popup__tag-suggestion:hover {
+  background: var(--surface);
+}
+
+.popup__tag-suggestion--active {
+  background: color-mix(in srgb, var(--primary) 16%, var(--bg));
+  color: var(--primary);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--primary);
 }
 
 .popup__btn {

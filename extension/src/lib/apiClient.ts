@@ -60,12 +60,12 @@ export async function apiRequest(
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new OpenBookmarkApiError(
         "network",
-        "OpenBookmark ist unter der konfigurierten URL nicht erreichbar.",
+        "Open Bookmark ist unter der konfigurierten URL nicht erreichbar.",
       );
     }
     throw new OpenBookmarkApiError(
       "network",
-      "OpenBookmark ist unter der konfigurierten URL nicht erreichbar.",
+      "Open Bookmark ist unter der konfigurierten URL nicht erreichbar.",
     );
   } finally {
     clearTimeout(timeoutId);

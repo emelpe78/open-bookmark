@@ -28,9 +28,7 @@ const notes = defineModel<string>("notes", { required: true });
       />
     </UFormField>
 
-    <UFormField label="Tags" hint="Kommagetrennt">
-      <UInput v-model="tagsInput" placeholder="nuxt, docs, lesen" />
-    </UFormField>
+    <BookmarkTagsInput v-model="tagsInput" />
 
     <UFormField label="Notizen">
       <MarkdownNotesField
