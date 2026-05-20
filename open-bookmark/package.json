@@ -37,6 +37,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "tag-utils": "file:../packages/tag-utils",
     "@nuxt/icon": "^1.15.0",
     "@nuxt/ui": "^4.1.0",
     "better-sqlite3": "^11.10.0",

@@ -3,7 +3,7 @@ import {
   applyTagSuggestion,
   filterTagSuggestions,
   getTagInputState,
-} from "#shared/lib/tagInputComposer";
+} from "../../../packages/tag-utils/src/tagInputComposer";
 
 const model = defineModel<string>({ required: true });
 

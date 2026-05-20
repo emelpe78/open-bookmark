@@ -3,7 +3,7 @@ import {
   type ApiRequestOptions,
   readApiError,
 } from "./apiClient";
-import { parseTagInput } from "./parseTagInput";
+import { parseTagInput } from "../../../packages/tag-utils/src/parseTagInput";
 import type {
   Bookmark,
   BookmarkListResponse,

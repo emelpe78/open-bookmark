@@ -1,4 +1,4 @@
-import { parseTagInput } from "./parseTagInput";
+import { parseTagInput } from "../../../packages/tag-utils/src/parseTagInput";
 import type { Bookmark } from "./types";
 
 function sortedTags(tags: string[]): string[] {

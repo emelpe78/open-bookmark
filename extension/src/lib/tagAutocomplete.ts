@@ -2,7 +2,7 @@ import {
   applyTagSuggestion,
   filterTagSuggestions,
   getTagInputState,
-} from "./tagInputComposer";
+} from "../../../packages/tag-utils/src/tagInputComposer";
 import { getTagCache, refreshTagCache } from "./tagCache";
 import { getServerBaseUrl, originPatternFromBaseUrl } from "./config";
 

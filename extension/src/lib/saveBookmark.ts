@@ -5,6 +5,7 @@ import {
 } from "./bookmarkFormChanges";
 import { findBookmarkByUrl } from "./findBookmarkByUrl";
 import { mapApiErrorToUserMessage } from "./mapApiError";
+import { parseTagInput } from "../../../packages/tag-utils/src/parseTagInput";
 import {
   addBookmarksToList,
   createBookmark,
@@ -12,7 +13,6 @@ import {
 } from "./openBookmarkApi";
 import type { Bookmark } from "./types";
 import { OpenBookmarkApiError } from "./types";
-import { parseTagInput } from "./parseTagInput";
 
 export interface SaveBookmarkOptions {
   notes?: string | null;

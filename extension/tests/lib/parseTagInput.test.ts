@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseTagInput } from "../../src/lib/parseTagInput";
+import { parseTagInput } from "../../../packages/tag-utils/src/parseTagInput";
 
 describe("parseTagInput", () => {
   it("parses comma-separated string", () => {

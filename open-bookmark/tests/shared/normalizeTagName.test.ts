@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeTagName } from "../../shared/lib/normalizeTagName";
+import { normalizeTagName } from "../../../packages/tag-utils/src/normalizeTagName";
 
 describe("normalizeTagName", () => {
   it("lowercases and replaces spaces with hyphens", () => {

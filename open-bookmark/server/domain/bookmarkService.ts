@@ -1,7 +1,7 @@
 import type { Bookmark, BulkImportResult, PageMetadata } from "#shared/types/bookmark";
 import { BookmarkDomainError } from "#shared/errors/bookmarkErrors";
 import { parseBookmarkExportHtml } from "#shared/lib/parseBookmarkExportHtml";
-import { parseTagInput } from "#shared/lib/parseTagInput";
+import { parseTagInput } from "../../../packages/tag-utils/src/parseTagInput";
 import { normalizeNotesInput } from "../../lib/markdown";
 import { normalizeUrl, UrlValidationError } from "../utils/normalizeUrl";
 import { resolvePageMetadata } from "../utils/metadata";

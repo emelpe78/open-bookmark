@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseTagInput } from "../../shared/lib/parseTagInput";
+import { parseTagInput } from "../../../packages/tag-utils/src/parseTagInput";
 
 describe("parseTagInput", () => {
   it("returns empty array for undefined", () => {

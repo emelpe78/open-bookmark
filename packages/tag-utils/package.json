@@ -1,0 +1,14 @@
+{
+  "name": "tag-utils",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./normalizeTagName": "./src/normalizeTagName.ts",
+    "./parseTagInput": "./src/parseTagInput.ts",
+    "./tagInputComposer": "./src/tagInputComposer.ts"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

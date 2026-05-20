@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { normalizeTagName } from "#shared/lib/normalizeTagName";
+import { normalizeTagName } from "../../../packages/tag-utils/src/normalizeTagName";
 
 const model = defineModel<string>({ required: true });
 

@@ -3,7 +3,7 @@ import {
   applyTagSuggestion,
   filterTagSuggestions,
   getTagInputState,
-} from "../../src/lib/tagInputComposer";
+} from "../../../packages/tag-utils/src/tagInputComposer";
 
 describe("tagInputComposer (extension)", () => {
   it("suggests after comma", () => {

@@ -7,7 +7,12 @@
     "noEmit": true,
     "skipLibCheck": true,
     "lib": ["ES2022", "DOM"],
-    "types": ["chrome", "vite/client"]
+    "types": ["chrome", "vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "tag-utils": ["../packages/tag-utils/src"],
+      "tag-utils/*": ["../packages/tag-utils/src/*"]
+    }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "vite.config.ts"]
 }
