@@ -1,5 +1,5 @@
-import { listTagsWithCounts } from "../../utils/tags";
+import { createBookmarkService } from "../../domain/createBookmarkService";
 
 export default defineEventHandler(() => {
-  return { tags: listTagsWithCounts() };
+  return { tags: createBookmarkService().listTags() };
 });
