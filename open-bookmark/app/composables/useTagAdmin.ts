@@ -10,18 +10,14 @@ export function useTagAdmin() {
 
   const tags = computed(() => data.value?.tags ?? []);
 
-  async function syncBookmarkViews(): Promise<void> {
-    await refresh();
-    const { refreshViews } = useBookmarks();
-    await refreshViews();
-  }
-
   async function createTag(name: string): Promise<TagWithCount> {
     const result = await $fetch<TagMutationResponse>("/api/tags", {
       method: "POST",
       body: { name },
     });
-    await syncBookmarkViews();
+    await refresh();
+    const { refreshViews } = useBookmarks();
+    await refreshViews();
     return result.tag;
   }
 
@@ -31,8 +27,9 @@ export function useTagAdmin() {
       method: "PATCH",
       body: { name },
     });
-    await syncBookmarkViews();
-    const { tag } = useBookmarks();
+    await refresh();
+    const { refreshViews, tag } = useBookmarks();
+    await refreshViews();
     if (previous && tag.value === previous.name) {
       tag.value = result.tag.name;
     }
@@ -42,8 +39,9 @@ export function useTagAdmin() {
   async function deleteTag(id: number): Promise<void> {
     const removed = tags.value.find((entry) => entry.id === id);
     await $fetch(`/api/tags/${id}`, { method: "DELETE" });
-    await syncBookmarkViews();
-    const { tag } = useBookmarks();
+    await refresh();
+    const { refreshViews, tag } = useBookmarks();
+    await refreshViews();
     if (removed && tag.value === removed.name) {
       tag.value = undefined;
     }

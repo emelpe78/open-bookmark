@@ -16,12 +16,6 @@ export function useListAdmin() {
 
   const lists = computed(() => data.value?.lists ?? []);
 
-  async function syncBookmarkViews(): Promise<void> {
-    await refresh();
-    const { refreshViews } = useBookmarks();
-    await refreshViews();
-  }
-
   async function createList(
     name: string,
     bookmarkIds: number[],
@@ -30,7 +24,9 @@ export function useListAdmin() {
       method: "POST",
       body: { name, bookmarkIds },
     });
-    await syncBookmarkViews();
+    await refresh();
+    const { refreshViews } = useBookmarks();
+    await refreshViews();
     return result.list;
   }
 
@@ -47,8 +43,9 @@ export function useListAdmin() {
       method: "PATCH",
       body: payload,
     });
-    await syncBookmarkViews();
-    const { list } = useBookmarks();
+    await refresh();
+    const { refreshViews, list } = useBookmarks();
+    await refreshViews();
     if (previous && list.value === previous.name && payload.name) {
       list.value = payload.name;
     }
@@ -63,15 +60,18 @@ export function useListAdmin() {
       method: "PATCH",
       body: { addBookmarkIds: bookmarkIds },
     });
-    await syncBookmarkViews();
+    await refresh();
+    const { refreshViews } = useBookmarks();
+    await refreshViews();
     return result.list;
   }
 
   async function deleteList(id: number): Promise<void> {
     const removed = lists.value.find((entry) => entry.id === id);
     await $fetch(`/api/lists/${id}`, { method: "DELETE" });
-    await syncBookmarkViews();
-    const { list } = useBookmarks();
+    await refresh();
+    const { refreshViews, list } = useBookmarks();
+    await refreshViews();
     if (removed && list.value === removed.name) {
       list.value = undefined;
     }
