@@ -25,26 +25,28 @@ Leitfaden für AI-Agents am Projekt **Open Bookmark** — lokaler Bookmark-Manag
 | Bereich | Pfad (`open-bookmark/`) |
 |---------|-------------------------|
 | UI | `app/pages/`, `app/components/`, `app/layouts/` |
-| Composables | `app/composables/` — u. a. `useBookmarks`, `useBookmarkModals`, `useBookmarkForm`, `useDesktopBridge`, `useListAdmin`, `useTagAdmin`, `useBookmarkListAutoSync` |
+| Composables | `app/composables/` — u. a. `useBookmarks`, `useBookmarkModals`, `useBookmarkForm`, `useBookmarkBulkSelection`, `useDesktopBridge`, `useListAdmin`, `useTagAdmin`, `useTagSuggestions`, `useBookmarkListAutoSync`, `useDatabaseSettings` |
 | Shared | `shared/constants/`, `shared/lib/`, `shared/errors/`, `shared/types/` |
 | Domain | `server/domain/bookmarkService.ts`, `createBookmarkService.ts` |
 | Repositories | `server/repositories/bookmarkRepository.ts`, `tagRepository.ts`, `listRepository.ts` |
 | API | `server/api/bookmarks/`, `server/api/tags/`, `server/api/lists/` |
-| HTTP-Adapter | `server/utils/http/mapBookmarkError.ts`, `parseRouteParams.ts` |
+| HTTP-Adapter | `server/utils/http/mapBookmarkError.ts`, `parseRouteParams.ts`, `parseListId.ts`, `parseTagId.ts` |
+| Datenbank-Utils | `server/utils/databaseDump.ts`, `databaseImport.ts`, `databaseInfo.ts`, `db.ts`, `normalizeUrl.ts`, `schemaMigrations.ts`, `tags.ts`, `validation.ts`, `createMemoryDatabase.ts` |
 | Metadaten | `server/utils/metadata.ts` (`extractMetadataFromHtml`, `fetchPageHtml`) |
+| Plugins | `server/plugins/desktop-public-config.ts`, `database.ts` |
 | Markdown | `lib/markdown.ts` |
-| Einstellungen / Extension | `app/pages/settings.vue` (`SettingsDatabaseSection`, `useDatabaseSettings`), `extension.vue`, `OnboardingModal.vue` |
+| Einstellungen / Extension | `app/pages/settings.vue` (`SettingsDatabaseSection`, `SettingsTagsPanel`, `SettingsListsPanel`, `SettingsThemeField`, `useDatabaseSettings`), `app/components/settings/` (6 Komponenten), `extension.vue`, `OnboardingModal.vue` |
 
 ## Desktop (`desktop/`)
 
 | Bereich | Pfad |
 |---------|------|
-| Main | `src/main.ts` |
+| Main | `src/main.ts`, `menu.ts`, `aboutDialog.ts`, `appIcon.ts`, `preferencesValidation.ts` |
 | Preload | `src/preload.cjs` (CommonJS) → `window.openBookmarkDesktop` |
 | DB-Pfad / Prefs | `src/preferences.ts`, `src/database/relocateDatabase.ts`, `src/runtime/paths.ts` |
+| Runtime | `src/runtime/startRuntime.ts`, `constants.ts`, `health.ts`, `port.ts`, `runDatabaseImport.ts` |
 | Branding | `src/appMetadata.ts`; Dev-Dock: `Open Bookmark.app` via `scripts/patch-electron-mac.sh` + `scripts/run-dev.sh` |
-| Runtime-Start | `src/runtime/startRuntime.ts` (Child: `node .output/server/index.mjs`) |
-| Packaging | `package.json` → `electron-builder`, `scripts/build-runtime.sh` |
+| Packaging | `package.json` → `electron-builder`, `scripts/build-runtime.sh`, `codesign-mac-app.sh`, `generate-icons.mjs`, `prepare-node.sh` |
 
 **Desktop-Regeln**
 
@@ -64,7 +66,9 @@ Eigenes npm-Package — **kein** Nuxt, **kein** Nuxt UI. TypeScript + Vite + `@c
 | Popup | `src/popup/` |
 | Einstellungen | `src/options/` |
 | Service Worker | `src/background/service-worker.ts` (Kontextmenü) |
-| API-Client | `src/lib/openBookmarkApi.ts`, `apiClient.ts` |
+| API-Client | `src/lib/openBookmarkApi.ts`, `apiClient.ts`, `mapApiError.ts`, `testConnection.ts` |
+| Tag-Helper | `src/lib/tagAutocomplete.ts`, `tagCache.ts`, `tagInputComposer.ts`, `tagSuggestions.ts`, `normalizeTagName.ts`, `parseTagInput.ts` |
+| Tab-Helper | `src/lib/activeTab.ts`, `findBookmarkByUrl.ts`, `bookmarkFormChanges.ts` |
 | Speichern | `src/lib/saveBookmark.ts` |
 | Konfiguration | `src/lib/config.ts` (`DEFAULT_SERVER_BASE_URL`: `http://localhost:3777`) |
 
