@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { extractFetchError } from "../utils/extractFetchError";
+import { parseTagInput } from "../../../packages/tag-utils/src/parseTagInput";
 
 const open = defineModel<boolean>("open", { default: false });
 
 const { editingBookmark, editingId, closeEdit } = useBookmarkModals();
 const { updateBookmark } = useBookmarks();
-const { parseTagsFromInput, buildNotesPayload, validateUrlNotEmpty } = useBookmarkForm();
 
 const url = ref("");
 const originalUrl = ref("");
@@ -36,9 +36,8 @@ async function submit() {
   }
 
   fieldError.value = null;
-  const urlError = validateUrlNotEmpty(url.value);
-  if (urlError) {
-    fieldError.value = urlError;
+  if (!url.value.trim()) {
+    fieldError.value = "Bitte eine URL eingeben.";
     return;
   }
 
@@ -48,8 +47,8 @@ async function submit() {
     notes: string | null;
     tags: string[];
   } = {
-    notes: buildNotesPayload(notes.value),
-    tags: parseTagsFromInput(tagsInput.value),
+    notes: notes.value.trim() || null,
+    tags: parseTagInput(tagsInput.value),
   };
 
   if (trimmedUrl !== originalUrl.value.trim()) {

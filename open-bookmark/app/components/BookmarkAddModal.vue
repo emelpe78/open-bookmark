@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { BulkImportResult } from "#shared/types/bookmark";
 import { extractFetchError } from "../utils/extractFetchError";
+import { parseTagInput } from "../../../packages/tag-utils/src/parseTagInput";
 
 const open = defineModel<boolean>("open", { default: false });
 
 const { createBookmark, bulkImport } = useBookmarks();
-const { parseTagsFromInput, buildNotesPayload, validateUrlNotEmpty } = useBookmarkForm();
 
 const activeTab = ref("single");
 const tabItems = [
@@ -39,9 +39,8 @@ watch(open, (isOpen) => {
 
 async function submitSingle() {
   fieldError.value = null;
-  const urlError = validateUrlNotEmpty(url.value);
-  if (urlError) {
-    fieldError.value = urlError;
+  if (!url.value.trim()) {
+    fieldError.value = "Bitte eine URL eingeben.";
     return;
   }
 
@@ -49,8 +48,8 @@ async function submitSingle() {
   try {
     await createBookmark({
       url: url.value.trim(),
-      notes: buildNotesPayload(notes.value),
-      tags: parseTagsFromInput(tagsInput.value),
+      notes: notes.value.trim() || null,
+      tags: parseTagInput(tagsInput.value),
     });
     open.value = false;
   } catch (error: unknown) {
