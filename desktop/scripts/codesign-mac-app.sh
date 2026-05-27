@@ -11,18 +11,7 @@ if [[ ! -d "$APP" ]]; then
   exit 1
 fi
 
-sign_macho() {
-  local file="$1"
-  if file "$file" 2>/dev/null | grep -q "Mach-O"; then
-    codesign --sign - --force --timestamp=none "$file"
-  fi
-}
-
-echo "==> Ad-hoc signing Mach-O files in $(basename "$APP")…"
-
-while IFS= read -r -d '' file; do
-  sign_macho "$file"
-done < <(find "$APP/Contents" -type f \( -name "*.node" -o -name "*.dylib" -o -perm +111 \) -print0)
+echo "==> Ad-hoc signing $(basename "$APP")…"
 
 codesign --sign - --force --deep --timestamp=none "$APP"
 codesign --verify --deep --strict "$APP"
