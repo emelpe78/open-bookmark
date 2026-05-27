@@ -13,6 +13,13 @@ npm ci
 npm run build
 npm ci --omit=dev
 
+# file:../packages/* symlinks break inside the packaged .app (target not copied).
+TAG_UTILS="$ROOT/open-bookmark/node_modules/tag-utils"
+if [[ -L "$TAG_UTILS" ]]; then
+  rm "$TAG_UTILS"
+  cp -R "$ROOT/packages/tag-utils" "$TAG_UTILS"
+fi
+
 echo "==> Building Chrome extension…"
 cd "$ROOT/extension"
 npm ci
