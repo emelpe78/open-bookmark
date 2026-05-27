@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Open Bookmark",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Speichere Webseiten mit einem Klick in deiner Open Bookmark-Instanz.",
   "icons": {
     "16": "public/icons/icon16.png",

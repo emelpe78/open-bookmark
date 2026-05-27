@@ -1,7 +1,7 @@
 {
   "name": "open-bookmark-desktop",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Open Bookmark — native macOS-Desktop-App (Electron-Hülle für die lokale Nitro-Runtime)",
   "author": "Marc Lettau-Poelchen (https://github.com/emelpe78)",
   "license": "MIT",
